@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            background: #e74c3c;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h3>Smart Income & Tax System</h3>
+    <div>
+        Welcome, {{ request.user.username }}
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h4>Your Dashboard</h4>
+        <p>Manage your income and tax planning here.</p>
+    </div>
+</div>
+
+</body>
+</html>
