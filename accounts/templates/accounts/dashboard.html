@@ -24,6 +24,7 @@
             background: #e74c3c;
             padding: 8px 15px;
             border-radius: 6px;
+            margin-left: 15px;
             transition: 0.3s;
         }
 
@@ -37,7 +38,7 @@
 
         .card-container {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 30px;
         }
 
@@ -45,30 +46,39 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            width: 280px;
+            width: 260px;
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            border-left: 6px solid #27ae60;
         }
+
+        .income-card { border-left: 6px solid #27ae60; }
+        .deduction-card { border-left: 6px solid #f39c12; }
 
         .card h2 {
             margin: 10px 0;
-            color: #27ae60;
         }
 
-        .add-btn {
+        .action-buttons {
+            margin-bottom: 25px;
+        }
+
+        .btn {
             display: inline-block;
-            background: #3498db;
-            color: white;
             padding: 10px 18px;
             border-radius: 6px;
             text-decoration: none;
-            margin-bottom: 25px;
+            color: white;
+            margin-right: 10px;
             transition: 0.3s;
         }
 
-        .add-btn:hover {
-            background: #2980b9;
-        }
+        .btn-income { background: #3498db; }
+        .btn-income:hover { background: #2980b9; }
+
+        .btn-deduction { background: #f39c12; }
+        .btn-deduction:hover { background: #d68910; }
+
+        .btn-tax { background: #27ae60; }
+        .btn-tax:hover { background: #1e8449; }
 
         table {
             width: 100%;
@@ -77,6 +87,7 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
             border-radius: 10px;
             overflow: hidden;
+            margin-bottom: 40px;
         }
 
         th {
@@ -98,7 +109,19 @@
         .empty-row {
             padding: 20px;
             font-style: italic;
-            text-align: center;
+        }
+
+        .delete-btn {
+            color: white;
+            background: #e74c3c;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
         }
 
         h3 {
@@ -118,26 +141,35 @@
 
 <div class="container">
 
-    <!-- Income Summary Card -->
+    <!-- SUMMARY CARDS -->
     <div class="card-container">
-        <div class="card">
+        <div class="card income-card">
             <h4>Total Income</h4>
             <h2>₹ {{ total_income }}</h2>
         </div>
+
+        <div class="card deduction-card">
+            <h4>Total Deductions</h4>
+            <h2>₹ {{ total_deductions }}</h2>
+        </div>
     </div>
 
-    <!-- Add Income Button -->
-    <a href="{% url 'add_income' %}" class="add-btn">+ Add Income</a>
+    <!-- ACTION BUTTONS -->
+    <div class="action-buttons">
+        <a href="{% url 'add_income' %}" class="btn btn-income">+ Add Income</a>
+        <a href="{% url 'add_deduction' %}" class="btn btn-deduction">+ Add Deduction</a>
+        <a href="{% url 'calculate_tax' %}" class="btn btn-tax">Calculate Tax</a>
+    </div>
 
-    <!-- Income Table -->
+    <!-- INCOME TABLE -->
     <h3>Your Income Records</h3>
-
     <table>
         <tr>
             <th>Source</th>
             <th>Amount (₹)</th>
             <th>Date</th>
             <th>Description</th>
+            <th>Action</th>
         </tr>
 
         {% for income in incomes %}
@@ -146,10 +178,41 @@
             <td>{{ income.amount }}</td>
             <td>{{ income.date }}</td>
             <td>{{ income.description }}</td>
+            <td>
+                <a href="{% url 'delete_income' income.id %}" class="delete-btn">Delete</a>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4" class="empty-row">No income records found.</td>
+            <td colspan="5" class="empty-row">No income records found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- DEDUCTION TABLE -->
+    <h3>Your Deduction Records</h3>
+    <table>
+        <tr>
+            <th>Section</th>
+            <th>Amount (₹)</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+
+        {% for deduction in deductions %}
+        <tr>
+            <td>{{ deduction.section }}</td>
+            <td>{{ deduction.amount }}</td>
+            <td>{{ deduction.date }}</td>
+            <td>{{ deduction.description }}</td>
+            <td>
+                <a href="{% url 'delete_deduction' deduction.id %}" class="delete-btn">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="empty-row">No deduction records found.</td>
         </tr>
         {% endfor %}
     </table>

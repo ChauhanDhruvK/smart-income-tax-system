@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tax Calculation Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            width: 70%;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div><strong>Smart Income & Tax System</strong></div>
+        <div>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Income Summary -->
+        <div class="card">
+            <h2>Income Summary</h2>
+            <div class="row">
+                <span>Total Income:</span>
+                <span>₹ {{ total_income }}</span>
+            </div>
+            <div class="row">
+                <span>Total Deductions:</span>
+                <span>₹ {{ total_deductions }}</span>
+            </div>
+            <div class="row">
+                <span>Taxable Income:</span>
+                <span>₹ {{ taxable_income }}</span>
+            </div>
+        </div>
+
+        <!-- Tax Breakdown -->
+        <div class="card">
+            <h2>Tax Breakdown (New Regime)</h2>
+            <div class="row">
+                <span>Calculated Tax:</span>
+                <span>₹ {{ tax }}</span>
+            </div>
+            <div class="row">
+                <span>4% Health & Education Cess:</span>
+                <span>₹ {{ cess }}</span>
+            </div>
+            <div class="row total">
+                <span>Total Tax Payable:</span>
+                <span>₹ {{ total_tax }}</span>
+            </div>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn">Back to Dashboard</a>
+
+    </div>
+
+</body>
+</html>
