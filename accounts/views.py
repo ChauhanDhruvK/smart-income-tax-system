@@ -158,33 +158,26 @@ def calculate_tax_view(request):
     tax = Decimal('0.00')
 
     # New Regime Slabs
-    if taxable_income <= 300000:
+    if taxable_income <= 400000:
         tax = Decimal('0.00')
 
-    elif taxable_income <= 600000:
-        tax = (taxable_income - 300000) * Decimal('0.05')
-
-    elif taxable_income <= 900000:
-        tax = (300000 * Decimal('0.05')) + \
-              (taxable_income - 600000) * Decimal('0.10')
+    elif taxable_income <= 800000:
+        tax = (taxable_income - 400000) * Decimal('0.05')
 
     elif taxable_income <= 1200000:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (taxable_income - 900000) * Decimal('0.15')
+        tax = (400000 * Decimal('0.05')) + \
+              (taxable_income - 800000) * Decimal('0.10')
 
-    elif taxable_income <= 1500000:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (300000 * Decimal('0.15')) + \
-              (taxable_income - 1200000) * Decimal('0.20')
-
+    elif taxable_income <= 1600000:
+        tax = (400000 * Decimal('0.05')) + \
+              (400000 * Decimal('0.10')) + \
+              (taxable_income - 1200000) * Decimal('0.15')
     else:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (300000 * Decimal('0.15')) + \
-              (300000 * Decimal('0.20')) + \
-              (taxable_income - 1500000) * Decimal('0.30')
+        tax = (400000 * Decimal('0.05')) + \
+              (400000 * Decimal('0.10')) + \
+              (400000 * Decimal('0.15')) + \
+              (400000 * Decimal('0.20')) + \
+              (taxable_income - 1600000) * Decimal('0.30')
 
     # 4% Cess
     cess = tax * Decimal('0.04')
