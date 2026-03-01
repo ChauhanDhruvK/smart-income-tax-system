@@ -3,9 +3,10 @@ from . import views
 
 
 urlpatterns = [
-        path('register/', views.register_view, name='register'),
+    path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+
     path('dashboard/', views.dashboard_view, name='dashboard'),
 
     path('add-income/', views.add_income, name='add_income'),
@@ -16,4 +17,7 @@ urlpatterns = [
 
     path('calculate-tax/', views.calculate_tax_view, name='calculate_tax'),
 
+    # ----------- NEW URL ADDED -----------
+    path('explore-plans/', views.explore_plans, name='explore_plans'),
+    path('plan/<str:plan_type>/', views.plan_detail, name='plan_detail'),
 ]

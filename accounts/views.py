@@ -6,6 +6,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from .models import Income, Deduction, TaxRecord
+from .ai_engine import get_plan_recommendation
+
+# -------- AI IMPORT --------
+import openai
+
+# -------- ADD YOUR API KEY --------
+openai.api_key = "YOUR_API_KEY"
 
 
 # ------------------ REGISTER ------------------
@@ -148,7 +155,6 @@ def calculate_tax_view(request):
     total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
     total_deductions = deductions.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
 
-    # Standard Deduction (New Regime)
     standard_deduction = Decimal('50000')
 
     taxable_income = total_income - standard_deduction
@@ -157,7 +163,6 @@ def calculate_tax_view(request):
 
     tax = Decimal('0.00')
 
-    # New Regime Slabs
     if taxable_income <= 400000:
         tax = Decimal('0.00')
 
@@ -172,6 +177,7 @@ def calculate_tax_view(request):
         tax = (400000 * Decimal('0.05')) + \
               (400000 * Decimal('0.10')) + \
               (taxable_income - 1200000) * Decimal('0.15')
+
     else:
         tax = (400000 * Decimal('0.05')) + \
               (400000 * Decimal('0.10')) + \
@@ -179,11 +185,9 @@ def calculate_tax_view(request):
               (400000 * Decimal('0.20')) + \
               (taxable_income - 1600000) * Decimal('0.30')
 
-    # 4% Cess
     cess = tax * Decimal('0.04')
     total_tax = tax + cess
 
-    # Save Tax Record
     TaxRecord.objects.create(
         user=request.user,
         total_income=total_income,
@@ -206,6 +210,32 @@ def calculate_tax_view(request):
 
     return render(request, 'accounts/tax_result.html', context)
 
+
+# ------------------ EXPLORE PLANS ------------------
+@login_required
+def explore_plans(request):
+    return render(request, 'accounts/explore_plans.html')
+
+
+# ------------------ PLAN DETAIL ------------------
+@login_required
+def plan_detail(request, plan_type):
+
+    incomes = Income.objects.filter(user=request.user)
+    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+
+    percent, amount, apps, ai_text = get_plan_recommendation(plan_type, total_income)
+
+    context = {
+        "plan": plan_type.upper(),
+        "income": total_income,
+        "percent": percent * 100,
+        "amount": amount,
+        "apps": apps,
+        "ai_text": ai_text
+    }
+
+    return render(request, "accounts/plan_detail.html", context)
 
 # ------------------ LOGOUT ------------------
 def logout_view(request):
