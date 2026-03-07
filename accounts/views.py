@@ -139,15 +139,42 @@ def delete_income(request, income_id):
 # ----------------------------
 # Add Deduction
 # ----------------------------
+from decimal import Decimal
+from django.db.models import Sum
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
+from .models import Income, Deduction
+
+
 @login_required
 def add_deduction(request):
 
     if request.method == "POST":
 
+        amount = Decimal(request.POST.get("amount"))
+
+        # Calculate total income
+        total_income = Income.objects.filter(user=request.user).aggregate(
+            Sum("amount")
+        )["amount__sum"] or Decimal("0.00")
+
+        # Calculate existing deductions
+        total_deductions = Deduction.objects.filter(user=request.user).aggregate(
+            Sum("amount")
+        )["amount__sum"] or Decimal("0.00")
+
+        # Check if deduction exceeds remaining income
+        remaining_income = total_income - total_deductions
+
+        if amount > remaining_income:
+            messages.error(request, "Deduction amount cannot exceed your remaining income.")
+            return redirect("add_deduction")
+
         Deduction.objects.create(
             user=request.user,
             section=request.POST.get("section"),
-            amount=Decimal(request.POST.get("amount")),
+            amount=amount,
             date=request.POST.get("date") or None,
             description=request.POST.get("description", "")
         )
@@ -156,7 +183,6 @@ def add_deduction(request):
         return redirect("dashboard")
 
     return render(request, "accounts/add_deduction.html")
-
 
 # ----------------------------
 # Delete Deduction
