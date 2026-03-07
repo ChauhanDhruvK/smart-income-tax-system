@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ plan }} Plan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4">
+    <span class="navbar-brand">{{ plan }} Investment</span>
+
+    <a href="{% url 'explore_plans' %}" class="btn btn-outline-light btn-sm">
+        Back
+    </a>
+</nav>
+
+<div class="container py-4">
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+
+            <h4>Your Financial Details</h4>
+
+            <p><strong>Monthly Income:</strong> ₹ {{ income }}</p>
+            <p><strong>Recommended Percentage:</strong> {{ percent }}%</p>
+            <p><strong>Investment Amount:</strong> ₹ {{ amount }}</p>
+
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+
+            <h4 class="text-primary">AI Recommendation</h4>
+
+            <div class="alert alert-info">
+                {{ ai_text }}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+
+            <h5>Suggested Apps</h5>
+
+            <ul>
+                {% for app in apps %}
+                <li>{{ app }}</li>
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
