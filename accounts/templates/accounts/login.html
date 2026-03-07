@@ -1,58 +1,122 @@
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
+<!doctype html>
+<html lang="en">
 
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>SmartTax Login</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
 
-<body class="bg-primary bg-gradient">
+<body style="
+      font-family: Poppins, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #eef4ff, #f8fbff, #ffffff);
+    ">
+    <div style="
+        width: 360px;
+        background: white;
+        padding: 35px;
+        border-radius: 14px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e6ecff;
+      ">
+        <h2 style="
+          text-align: center;
+          font-size: 24px;
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 5px;
+        ">
+            SmartTax Login
+        </h2>
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
-
-    <div class="card shadow p-4" style="width: 350px; border-radius: 10px;">
-
-        <h2 class="text-center mb-4">Login</h2>
+        <p style="
+          text-align: center;
+          font-size: 13px;
+          color: #7a8ca3;
+          margin-bottom: 25px;
+        ">
+            Access your income & tax dashboard
+        </p>
 
         {% for message in messages %}
-            <div class="alert alert-danger py-2">
-                {{ message }}
-            </div>
+        <div style="
+          background: #ffe5e5;
+          color: #cc3333;
+          padding: 8px;
+          border-radius: 6px;
+          font-size: 13px;
+          margin-bottom: 15px;
+          text-align: center;
+        ">
+            {{ message }}
+        </div>
         {% endfor %}
 
         <form method="POST">
             {% csrf_token %}
 
-            <input type="text"
-                   name="username"
-                   class="form-control mb-3"
-                   placeholder="Username"
-                   required>
+            <input type="text" name="username" placeholder="Username" required style="
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dce4ff;
+            margin-bottom: 15px;
+            font-size: 14px;
+            outline: none;
+            background: #f9fbff;
+          " />
 
-            <input type="password"
-                   name="password"
-                   class="form-control mb-3"
-                   placeholder="Password"
-                   required>
+            <input type="password" name="password" placeholder="Password" required style="
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dce4ff;
+            margin-bottom: 18px;
+            font-size: 14px;
+            outline: none;
+            background: #f9fbff;
+          " />
 
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" style="
+            width: 100%;
+            padding: 10px;
+            background: #4f6cff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+          ">
                 Login
             </button>
         </form>
 
-        <p class="mt-3 text-center">
-            Don't have account?
-            <a href="{% url 'register' %}" class="text-decoration-none">
+        <p style="
+          margin-top: 18px;
+          font-size: 13px;
+          text-align: center;
+          color: #6c7a8a;
+        ">
+            Don't have an account?
+
+            <a href="{% url 'register' %}" style="color: #4f6cff; font-weight: 500; text-decoration: none">
                 Register
             </a>
         </p>
-
     </div>
-
-</div>
-
 </body>
+
 </html>
