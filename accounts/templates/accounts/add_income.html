@@ -1,61 +1,116 @@
-{% load static %}
+{% extends 'accounts/base.html' %}
+{% block title %}Add Income{% endblock %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Income</title>
+{% block content %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-<body class="bg-light">
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+        font-weight: 500;
+    }
 
-    <div class="card shadow p-4" style="width: 420px; border-radius: 12px;">
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
 
-        <h2 class="text-center mb-4 text-dark">Add Income</h2>
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
 
-        <form method="POST">
-            {% csrf_token %}
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
 
-            <input type="text"
-                   name="source"
-                   class="form-control mb-3"
-                   placeholder="Income Source"
-                   required>
+    .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-            <input type="number"
-                   step="0.01"
-                   name="amount"
-                   class="form-control mb-3"
-                   placeholder="Amount (₹)"
-                   required>
+    .chip {
+        padding: 0.5rem 1rem;
+        background: #F3F4F6;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
 
-            <input type="date"
-                   name="date"
-                   class="form-control mb-3"
-                   required>
+    .chip:hover {
+        background: var(--primary);
+        color: white;
+    }
+</style>
 
-            <textarea name="description"
-                      class="form-control mb-3"
-                      placeholder="Description"></textarea>
-
-            <button type="submit" class="btn btn-success w-100">
-                Add Income
-            </button>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="{% url 'dashboard' %}" class="text-decoration-none text-primary">
-                ← Back to Dashboard
-            </a>
-        </div>
-
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add Income</h1>
+        <p style="color: var(--text-light);">Record your income details</p>
     </div>
 
-</div>
+    <div class="suggestions">
+        <span class="chip" onclick="document.getElementById('source').value='Salary'">Salary</span>
+        <span class="chip" onclick="document.getElementById('source').value='Freelance'">Freelance</span>
+        <span class="chip" onclick="document.getElementById('source').value='Business'">Business</span>
+        <span class="chip" onclick="document.getElementById('source').value='Rental'">Rental</span>
+    </div>
 
-</body>
-</html>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Source</label>
+            <input type="text" id="source" name="source" placeholder="e.g., Salary" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" name="date" value="{% now 'Y-m-d' %}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description (Optional)</label>
+            <textarea name="description" rows="3" placeholder="Add notes..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Income</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

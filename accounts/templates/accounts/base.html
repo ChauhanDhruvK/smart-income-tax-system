@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxPlanner - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    {% if user.is_authenticated %}
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'dashboard' %}"
+                    class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    TaxPlanner
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-purple-600 transition">Dashboard</a>
+                    <a href="{% url 'add_income' %}" class="text-gray-700 hover:text-purple-600 transition">Add
+                        Income</a>
+                    <a href="{% url 'add_deduction' %}" class="text-gray-700 hover:text-purple-600 transition">Add
+                        Deduction</a>
+                    <a href="{% url 'calculate_tax' %}" class="text-gray-700 hover:text-purple-600 transition">Calculate
+                        Tax</a>
+                    <a href="{% url 'explore_plans' %}" class="text-gray-700 hover:text-purple-600 transition">Plans</a>
+                    <a href="{% url 'logout' %}"
+                        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

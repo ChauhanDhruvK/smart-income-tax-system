@@ -1,148 +1,78 @@
-{% load static %}
+{% extends 'accounts/base.html' %}
+{% block title %}Dashboard{% endblock %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-light">
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand mb-0 h5">Smart Income & Tax System</span>
-
-    <div class="text-white d-flex align-items-center">
-
-        <span class="me-3">Welcome, {{ request.user.username }}</span>
-
-        <a href="{% url 'explore_plans' %}" class="btn btn-info btn-sm me-2">
-            Explore Plans
-        </a>
-
-        <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">
-            Logout
-        </a>
-
-    </div>
-</nav>
-
-<div class="container py-4">
-
-    <!-- SUMMARY CARDS -->
-    <div class="row mb-4">
-
-        <div class="col-md-4">
-            <div class="card shadow border-start border-success border-4">
-                <div class="card-body">
-                    <h5>Total Income</h5>
-                    <h3 class="text-success">₹ {{ total_income }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card shadow border-start border-warning border-4">
-                <div class="card-body">
-                    <h5>Total Deductions</h5>
-                    <h3 class="text-warning">₹ {{ total_deductions }}</h3>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ACTION BUTTONS -->
-    <div class="mb-4">
-        <a href="{% url 'add_income' %}" class="btn btn-primary me-2">+ Add Income</a>
-        <a href="{% url 'add_deduction' %}" class="btn btn-warning me-2">+ Add Deduction</a>
-        <a href="{% url 'calculate_tax' %}" class="btn btn-success">Calculate Tax</a>
-    </div>
-
-    <!-- INCOME TABLE -->
-    <h4 class="mb-3">Your Income Records</h4>
-
-    <div class="table-responsive mb-5">
-        <table class="table table-bordered table-hover shadow-sm bg-white">
-            <thead class="table-dark">
-                <tr>
-                    <th>Source</th>
-                    <th>Amount (₹)</th>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for income in incomes %}
-                <tr>
-                    <td>{{ income.source }}</td>
-                    <td>{{ income.amount }}</td>
-                    <td>{{ income.date }}</td>
-                    <td>{{ income.description }}</td>
-                    <td>
-                        <a href="{% url 'delete_income' income.id %}"
-                           class="btn btn-danger btn-sm">
-                           Delete
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted">
-                        No income records found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- DEDUCTION TABLE -->
-    <h4 class="mb-3">Your Deduction Records</h4>
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover shadow-sm bg-white">
-            <thead class="table-dark">
-                <tr>
-                    <th>Section</th>
-                    <th>Amount (₹)</th>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for deduction in deductions %}
-                <tr>
-                    <td>{{ deduction.section }}</td>
-                    <td>{{ deduction.amount }}</td>
-                    <td>{{ deduction.date }}</td>
-                    <td>{{ deduction.description }}</td>
-                    <td>
-                        <a href="{% url 'delete_deduction' deduction.id %}"
-                           class="btn btn-danger btn-sm">
-                           Delete
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted">
-                        No deduction records found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
+{% block content %}
+<div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white mb-8">
+    <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.first_name|default:user.username }}! 👋</h1>
+    <p class="text-purple-100">Here's your financial summary</p>
 </div>
 
-</body>
-</html>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+        <p class="text-sm text-gray-600 mb-1">Total Income</p>
+        <p class="text-3xl font-bold text-gray-900">₹{{ total_income|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+        <p class="text-sm text-gray-600 mb-1">Total Deductions</p>
+        <p class="text-3xl font-bold text-gray-900">₹{{ total_deductions|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+        <p class="text-sm text-gray-600 mb-1">Net Income</p>
+        <p class="text-3xl font-bold text-gray-900">₹{{ net_income|floatformat:2 }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Income</h3>
+        {% for income in incomes %}
+        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+            <div>
+                <p class="font-medium text-gray-900">{{ income.source }}</p>
+                <p class="text-sm text-gray-500">{{ income.date|date:"d M Y" }}</p>
+            </div>
+            <p class="font-semibold text-green-600">+₹{{ income.amount|floatformat:2 }}</p>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">No income added yet</p>
+        {% endfor %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Deductions</h3>
+        {% for deduction in deductions %}
+        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+            <div>
+                <p class="font-medium text-gray-900">{{ deduction.section }}</p>
+                <p class="text-sm text-gray-500">{{ deduction.date|date:"d M Y" }}</p>
+            </div>
+            <p class="font-semibold text-orange-600">-₹{{ deduction.amount|floatformat:2 }}</p>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">No deductions added yet</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <a href="{% url 'add_income' %}" class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
+        <div class="text-2xl mb-2">💰</div>
+        <span class="text-sm font-medium text-gray-700">Add Income</span>
+    </a>
+    <a href="{% url 'add_deduction' %}"
+        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
+        <div class="text-2xl mb-2">📉</div>
+        <span class="text-sm font-medium text-gray-700">Add Deduction</span>
+    </a>
+    <a href="{% url 'calculate_tax' %}"
+        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
+        <div class="text-2xl mb-2">🧮</div>
+        <span class="text-sm font-medium text-gray-700">Calculate Tax</span>
+    </a>
+    <a href="{% url 'explore_plans' %}"
+        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
+        <div class="text-2xl mb-2">📊</div>
+        <span class="text-sm font-medium text-gray-700">Explore Plans</span>
+    </a>
+</div>
+{% endblock %}

@@ -1,5 +1,9 @@
 # Database
 db.sqlite3
+__pycache__/
+*.pyc
+.env
+venv/
 
 # Python cache
 __pycache__/

@@ -6,16 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from .models import Income, Deduction, TaxRecord
-from .ai_engine import get_plan_recommendation
 
-# -------- AI IMPORT --------
-import openai
-
-# -------- ADD YOUR API KEY --------
-openai.api_key = "YOUR_API_KEY"
-
-
-# ------------------ REGISTER ------------------
+# Register
 def register_view(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -36,172 +28,126 @@ def register_view(request):
             email=email,
             password=password
         )
-        user.save()
-
         messages.success(request, "Account created successfully!")
         return redirect('login')
-
     return render(request, 'accounts/register.html')
 
-
-# ------------------ LOGIN ------------------
+# Login
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
-
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
             login(request, user)
             return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password")
             return redirect('login')
-
     return render(request, 'accounts/login.html')
 
-
-# ------------------ DASHBOARD ------------------
+# Dashboard
 @login_required
 def dashboard_view(request):
-    incomes = Income.objects.filter(user=request.user)
-    deductions = Deduction.objects.filter(user=request.user)
-
-    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-    total_deductions = deductions.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    incomes = Income.objects.filter(user=request.user).order_by('-date')[:5]
+    deductions = Deduction.objects.filter(user=request.user).order_by('-date')[:5]
+    
+    total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    total_deductions = Deduction.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    
+    # Fix: Use created_at instead of calculated_date
+    recent_tax = TaxRecord.objects.filter(user=request.user).order_by('-created_at')[:5]
 
     context = {
         'incomes': incomes,
         'deductions': deductions,
         'total_income': total_income,
         'total_deductions': total_deductions,
+        'net_income': total_income - total_deductions,
+        'recent_tax': recent_tax,
+        'income_count': Income.objects.filter(user=request.user).count(),
+        'deduction_count': Deduction.objects.filter(user=request.user).count(),
     }
-
     return render(request, 'accounts/dashboard.html', context)
 
-
-# ------------------ ADD INCOME ------------------
+# Add Income
 @login_required
 def add_income(request):
     if request.method == "POST":
-        source = request.POST.get('source')
-        amount = request.POST.get('amount')
-        date = request.POST.get('date')
-        description = request.POST.get('description')
-
         Income.objects.create(
             user=request.user,
-            source=source,
-            amount=Decimal(amount),
-            date=date,
-            description=description
+            source=request.POST.get('source'),
+            amount=Decimal(request.POST.get('amount')),
+            date=request.POST.get('date') or None,
+            description=request.POST.get('description', '')
         )
-
         messages.success(request, "Income added successfully!")
         return redirect('dashboard')
-
     return render(request, 'accounts/add_income.html')
 
-
-# ------------------ DELETE INCOME ------------------
+# Delete Income
 @login_required
 def delete_income(request, income_id):
     income = get_object_or_404(Income, id=income_id, user=request.user)
     income.delete()
-    messages.success(request, "Income deleted successfully!")
+    messages.success(request, "Income deleted!")
     return redirect('dashboard')
 
-
-# ------------------ ADD DEDUCTION ------------------
+# Add Deduction
 @login_required
 def add_deduction(request):
     if request.method == "POST":
-        section = request.POST.get('section')
-        amount = request.POST.get('amount')
-        date = request.POST.get('date')
-        description = request.POST.get('description')
-
         Deduction.objects.create(
             user=request.user,
-            section=section,
-            amount=Decimal(amount),
-            date=date,
-            description=description
+            section=request.POST.get('section'),
+            amount=Decimal(request.POST.get('amount')),
+            date=request.POST.get('date') or None,
+            description=request.POST.get('description', '')
         )
-
         messages.success(request, "Deduction added successfully!")
         return redirect('dashboard')
-
     return render(request, 'accounts/add_deduction.html')
 
-
-# ------------------ DELETE DEDUCTION ------------------
+# Delete Deduction
 @login_required
 def delete_deduction(request, deduction_id):
     deduction = get_object_or_404(Deduction, id=deduction_id, user=request.user)
     deduction.delete()
-    messages.success(request, "Deduction deleted successfully!")
+    messages.success(request, "Deduction deleted!")
     return redirect('dashboard')
 
-
-# ------------------ TAX CALCULATION ------------------
+# Calculate Tax
 @login_required
 def calculate_tax_view(request):
-
-    incomes = Income.objects.filter(user=request.user)
-    deductions = Deduction.objects.filter(user=request.user)
-
-    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-    total_deductions = deductions.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-
-    # Standard Deduction
-    standard_deduction = Decimal('50000')
-
-    taxable_income = total_income - standard_deduction
+    total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    total_deductions = Deduction.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    
+    # Simple tax calculation (new regime)
+    taxable_income = total_income - Decimal('50000')  # Standard deduction
     if taxable_income < 0:
         taxable_income = Decimal('0.00')
-
+    
     tax = Decimal('0.00')
-
-    # -------- NEW REGIME SLABS --------
-    if taxable_income <= 300000:
-        tax = Decimal('0.00')
-
-    elif taxable_income <= 600000:
-        tax = (taxable_income - 300000) * Decimal('0.05')
-
-    elif taxable_income <= 900000:
-        tax = (300000 * Decimal('0.05')) + \
-              (taxable_income - 600000) * Decimal('0.10')
-
-    elif taxable_income <= 1200000:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (taxable_income - 900000) * Decimal('0.15')
-
-    elif taxable_income <= 1500000:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (300000 * Decimal('0.15')) + \
-              (taxable_income - 1200000) * Decimal('0.20')
-
-    else:
-        tax = (300000 * Decimal('0.05')) + \
-              (300000 * Decimal('0.10')) + \
-              (300000 * Decimal('0.15')) + \
-              (300000 * Decimal('0.20')) + \
-              (taxable_income - 1500000) * Decimal('0.30')
-
-    # -------- REBATE 87A --------
+    if taxable_income > 300000:
+        if taxable_income <= 600000:
+            tax = (taxable_income - 300000) * Decimal('0.05')
+        elif taxable_income <= 900000:
+            tax = (300000 * Decimal('0.05')) + (taxable_income - 600000) * Decimal('0.10')
+        elif taxable_income <= 1200000:
+            tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (taxable_income - 900000) * Decimal('0.15')
+        elif taxable_income <= 1500000:
+            tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (300000 * Decimal('0.15')) + (taxable_income - 1200000) * Decimal('0.20')
+        else:
+            tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (300000 * Decimal('0.15')) + (300000 * Decimal('0.20')) + (taxable_income - 1500000) * Decimal('0.30')
+    
+    # Rebate for income up to 7 lakhs
     if taxable_income <= 700000:
         tax = Decimal('0.00')
-
-    # -------- CESS --------
+    
     cess = tax * Decimal('0.04')
     total_tax = tax + cess
-
-    # Save Record
+    
+    # Save record
     TaxRecord.objects.create(
         user=request.user,
         total_income=total_income,
@@ -212,7 +158,7 @@ def calculate_tax_view(request):
         total_tax=total_tax,
         regime='new'
     )
-
+    
     context = {
         'total_income': total_income,
         'total_deductions': total_deductions,
@@ -220,37 +166,119 @@ def calculate_tax_view(request):
         'tax': tax,
         'cess': cess,
         'total_tax': total_tax,
+        'effective_tax_rate': (total_tax / total_income * 100) if total_income > 0 else 0,
     }
-
     return render(request, 'accounts/tax_result.html', context)
 
-
-# ------------------ EXPLORE PLANS ------------------
+# Explore Plans
 @login_required
 def explore_plans(request):
     return render(request, 'accounts/explore_plans.html')
 
-
-@login_required
-def plan_detail(request, plan_type):
-
-    incomes = Income.objects.filter(user=request.user)
-    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-
-    percent, amount, apps, ai_text = get_plan_recommendation(plan_type, total_income)
-
-    context = {
-        "plan": plan_type.upper(),
-        "income": total_income,
-        "percent": percent * 100,
-        "amount": amount,
-        "apps": apps,
-        "ai_text": ai_text
-    }
-
-    return render(request, "accounts/plan_detail.html", context)
-
-# ------------------ LOGOUT ------------------
+# Logout
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def plan_detail(request, plan_type):
+    plans = {
+        'elss': {'name': 'ELSS Mutual Funds', 'return': '14%', 'desc': 'Tax saving under 80C with highest returns'},
+        'ppf': {'name': 'PPF', 'return': '7.1%', 'desc': 'Risk-free government backed investment'},
+        'health': {'name': 'Health Insurance', 'return': 'Coverage', 'desc': 'Tax benefit under 80D'},
+        'nps': {'name': 'NPS', 'return': '10-12%', 'desc': 'National Pension System with extra benefits'},
+        'home': {'name': 'Home Loan', 'return': '8.5%', 'desc': 'Tax benefits on principal and interest'},
+        'education': {'name': 'Education Loan', 'return': '9-11%', 'desc': 'Deduction on interest paid'}
+    }
+    plan = plans.get(plan_type, plans['elss'])
+    context = {
+        'plan': plan,
+        'plan_type': plan_type
+    }
+    return render(request, 'accounts/plan_detail.html', context)
+
+@login_required
+def calculate_tax_view(request):
+    total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    total_deductions = Deduction.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    
+    # Get regime from request
+    regime = request.GET.get('regime', 'new')
+    
+    # Simple tax calculation
+    if regime == 'old':
+        taxable_income = total_income - total_deductions - Decimal('50000')  # Standard deduction
+    else:
+        taxable_income = total_income - Decimal('50000')  # New regime with standard deduction
+    
+    if taxable_income < 0:
+        taxable_income = Decimal('0.00')
+    
+    # Calculate tax based on slabs
+    tax = Decimal('0.00')
+    surcharge = Decimal('0.00')
+    
+    if regime == 'new':
+        # New regime slabs
+        if taxable_income > 300000:
+            if taxable_income <= 600000:
+                tax = (taxable_income - 300000) * Decimal('0.05')
+            elif taxable_income <= 900000:
+                tax = (300000 * Decimal('0.05')) + (taxable_income - 600000) * Decimal('0.10')
+            elif taxable_income <= 1200000:
+                tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (taxable_income - 900000) * Decimal('0.15')
+            elif taxable_income <= 1500000:
+                tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (300000 * Decimal('0.15')) + (taxable_income - 1200000) * Decimal('0.20')
+            else:
+                tax = (300000 * Decimal('0.05')) + (300000 * Decimal('0.10')) + (300000 * Decimal('0.15')) + (300000 * Decimal('0.20')) + (taxable_income - 1500000) * Decimal('0.30')
+        
+        # Rebate for income up to 7 lakhs
+        if taxable_income <= 700000:
+            tax = Decimal('0.00')
+    else:
+        # Old regime slabs
+        if taxable_income > 250000:
+            if taxable_income <= 500000:
+                tax = (taxable_income - 250000) * Decimal('0.05')
+            elif taxable_income <= 1000000:
+                tax = (250000 * Decimal('0.05')) + (taxable_income - 500000) * Decimal('0.20')
+            else:
+                tax = (250000 * Decimal('0.05')) + (500000 * Decimal('0.20')) + (taxable_income - 1000000) * Decimal('0.30')
+        
+        # Rebate for income up to 5 lakhs
+        if taxable_income <= 500000:
+            tax = Decimal('12500') if tax > Decimal('12500') else tax
+    
+    # Add surcharge for high income (simplified)
+    if taxable_income > 5000000:
+        surcharge = tax * Decimal('0.10')
+    
+    # Health and Education Cess
+    cess = (tax + surcharge) * Decimal('0.04')
+    total_tax = tax + surcharge + cess
+    
+    # Save record
+    TaxRecord.objects.create(
+        user=request.user,
+        total_income=total_income,
+        total_deductions=total_deductions,
+        taxable_income=taxable_income,
+        tax_amount=tax,
+        surcharge=surcharge,
+        cess=cess,
+        total_tax=total_tax,
+        regime=regime
+    )
+    
+    context = {
+        'total_income': total_income,
+        'total_deductions': total_deductions,
+        'taxable_income': taxable_income,
+        'tax': tax,
+        'surcharge': surcharge,
+        'cess': cess,
+        'total_tax': total_tax,
+        'regime': regime,
+        'effective_tax_rate': (total_tax / total_income * 100) if total_income > 0 else 0,
+    }
+    return render(request, 'accounts/calculate_tax.html', context)

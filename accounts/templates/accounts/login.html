@@ -1,122 +1,112 @@
-{% load static %}
+{% extends 'accounts/base.html' %}
+{% block title %}Login{% endblock %}
 
-<!doctype html>
-<html lang="en">
+{% block content %}
+<style>
+    .auth-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>SmartTax Login</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
-</head>
-
-<body style="
-      font-family: Poppins, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #eef4ff, #f8fbff, #ffffff);
-    ">
-    <div style="
-        width: 360px;
+    .auth-card {
         background: white;
-        padding: 35px;
-        border-radius: 14px;
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e6ecff;
-      ">
-        <h2 style="
-          text-align: center;
-          font-size: 24px;
-          font-weight: 600;
-          color: #2c3e50;
-          margin-bottom: 5px;
-        ">
-            SmartTax Login
-        </h2>
+        border-radius: 16px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
 
-        <p style="
-          text-align: center;
-          font-size: 13px;
-          color: #7a8ca3;
-          margin-bottom: 25px;
-        ">
-            Access your income & tax dashboard
-        </p>
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-        {% for message in messages %}
-        <div style="
-          background: #ffe5e5;
-          color: #cc3333;
-          padding: 8px;
-          border-radius: 6px;
-          font-size: 13px;
-          margin-bottom: 15px;
-          text-align: center;
-        ">
-            {{ message }}
+    .auth-header h1 {
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: var(--text-light);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--text-light);
+    }
+
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .demo-box {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #F3F4F6;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Welcome Back! 👋</h1>
+            <p>Login to your account</p>
         </div>
-        {% endfor %}
 
         <form method="POST">
             {% csrf_token %}
-
-            <input type="text" name="username" placeholder="Username" required style="
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #dce4ff;
-            margin-bottom: 15px;
-            font-size: 14px;
-            outline: none;
-            background: #f9fbff;
-          " />
-
-            <input type="password" name="password" placeholder="Password" required style="
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #dce4ff;
-            margin-bottom: 18px;
-            font-size: 14px;
-            outline: none;
-            background: #f9fbff;
-          " />
-
-            <button type="submit" style="
-            width: 100%;
-            padding: 10px;
-            background: #4f6cff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s;
-          ">
-                Login
-            </button>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
         </form>
 
-        <p style="
-          margin-top: 18px;
-          font-size: 13px;
-          text-align: center;
-          color: #6c7a8a;
-        ">
-            Don't have an account?
+        <div class="auth-footer">
+            Don't have an account? <a href="{% url 'register' %}">Register</a>
+        </div>
 
-            <a href="{% url 'register' %}" style="color: #4f6cff; font-weight: 500; text-decoration: none">
-                Register
-            </a>
-        </p>
+        <div class="demo-box">
+            <strong>Demo:</strong> demo / demo12345
+        </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

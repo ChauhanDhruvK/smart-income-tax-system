@@ -1,0 +1,237 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Tax Calculator{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            Tax Calculator
+        </h1>
+        <p class="text-gray-600 text-lg">Calculate your tax liability under different regimes</p>
+    </div>
+
+    <!-- Main Calculator Card -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <!-- Regime Toggle -->
+        <div class="bg-gray-50 p-6 border-b">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">Select Tax Regime</h2>
+                <div class="flex bg-white rounded-lg p-1 shadow-sm">
+                    <a href="?regime=new"
+                        class="px-8 py-3 rounded-lg font-semibold transition-all duration-200 {% if regime == 'new' %}bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md{% else %}text-gray-600 hover:text-purple-600{% endif %}">
+                        New Regime
+                    </a>
+                    <a href="?regime=old"
+                        class="px-8 py-3 rounded-lg font-semibold transition-all duration-200 {% if regime == 'old' %}bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md{% else %}text-gray-600 hover:text-purple-600{% endif %}">
+                        Old Regime
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="p-8">
+            <!-- Main Tax Amount Card -->
+            <div
+                class="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-16 -mb-16"></div>
+
+                <div class="relative">
+                    <p class="text-purple-100 mb-2 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                        </svg>
+                        Your Total Tax Liability
+                    </p>
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-5xl md:text-6xl font-bold">₹{{ total_tax|floatformat:2 }}</span>
+                        <span class="text-purple-200 text-lg">per year</span>
+                    </div>
+
+                    <!-- Tax Rate Badge -->
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <span class="bg-white bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
+                            Effective Rate: {{ effective_tax_rate|floatformat:1 }}%
+                        </span>
+                        {% if regime == 'new' %}
+                        <span class="bg-green-400 bg-opacity-30 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
+                            Standard Deduction: ₹50,000
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-600">Total Income</span>
+                        <span class="text-2xl">💰</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ total_income|floatformat:2 }}</p>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-600">Total Deductions</span>
+                        <span class="text-2xl">📉</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ total_deductions|floatformat:2 }}</p>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-600">Taxable Income</span>
+                        <span class="text-2xl">⚖️</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ taxable_income|floatformat:2 }}</p>
+                </div>
+            </div>
+
+            <!-- Tax Breakdown -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Detailed Breakdown -->
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
+                            <span class="text-purple-600">📊</span>
+                        </span>
+                        Tax Breakdown
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                            <span class="text-gray-600">Base Tax</span>
+                            <span class="font-semibold text-gray-900">₹{{ tax|floatformat:2 }}</span>
+                        </div>
+                        {% if surcharge and surcharge > 0 %}
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                            <span class="text-gray-600">Surcharge</span>
+                            <span class="font-semibold text-gray-900">₹{{ surcharge|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                            <span class="text-gray-600">Health & Education Cess (4%)</span>
+                            <span class="font-semibold text-gray-900">₹{{ cess|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-lg font-bold text-gray-800">Total Payable</span>
+                            <span class="text-2xl font-bold text-purple-600">₹{{ total_tax|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Slabs Info -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                            <span class="text-blue-600">📋</span>
+                        </span>
+                        {% if regime == 'new' %}New Regime Slabs{% else %}Old Regime Slabs{% endif %}
+                    </h3>
+
+                    {% if regime == 'new' %}
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm"><span>Up to ₹3,00,000</span><span
+                                class="font-medium text-green-600">Nil</span></div>
+                        <div class="flex justify-between text-sm"><span>₹3,00,001 - ₹6,00,000</span><span
+                                class="font-medium">5%</span></div>
+                        <div class="flex justify-between text-sm"><span>₹6,00,001 - ₹9,00,000</span><span
+                                class="font-medium">10%</span></div>
+                        <div class="flex justify-between text-sm"><span>₹9,00,001 - ₹12,00,000</span><span
+                                class="font-medium">15%</span></div>
+                        <div class="flex justify-between text-sm"><span>₹12,00,001 - ₹15,00,000</span><span
+                                class="font-medium">20%</span></div>
+                        <div class="flex justify-between text-sm"><span>Above ₹15,00,000</span><span
+                                class="font-medium">30%</span></div>
+                    </div>
+                    <div class="mt-4 p-3 bg-white rounded-lg text-sm text-gray-600">
+                        <span class="font-medium text-green-600">Note:</span> Rebate under 87A - No tax if income ≤
+                        ₹7,00,000
+                    </div>
+                    {% else %}
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm"><span>Up to ₹2,50,000</span><span
+                                class="font-medium text-green-600">Nil</span></div>
+                        <div class="flex justify-between text-sm"><span>₹2,50,001 - ₹5,00,000</span><span
+                                class="font-medium">5%</span></div>
+                        <div class="flex justify-between text-sm"><span>₹5,00,001 - ₹10,00,000</span><span
+                                class="font-medium">20%</span></div>
+                        <div class="flex justify-between text-sm"><span>Above ₹10,00,000</span><span
+                                class="font-medium">30%</span></div>
+                    </div>
+                    <div class="mt-4 p-3 bg-white rounded-lg text-sm text-gray-600">
+                        <span class="font-medium text-green-600">Note:</span> Rebate under 87A - Max ₹12,500 if income ≤
+                        ₹5,00,000
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Regime Comparison -->
+            <div class="mt-8 bg-purple-50 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
+                        <span class="text-purple-600">⚖️</span>
+                    </span>
+                    Quick Comparison
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg">
+                        <h4 class="font-semibold text-purple-600 mb-2">✓ New Regime Benefits</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Lower tax rates</li>
+                            <li>• No need to track investments</li>
+                            <li>• Standard deduction of ₹50,000</li>
+                            <li>• Simple compliance</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-600 mb-2">✓ Old Regime Benefits</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Multiple deduction options (80C, 80D, etc.)</li>
+                            <li>• HRA & LTA exemptions</li>
+                            <li>• Better for high spenders/investors</li>
+                            <li>• Home loan benefits</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                <a href="{% url 'dashboard' %}"
+                    class="flex-1 bg-gray-100 text-gray-700 text-center px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
+                    ← Back to Dashboard
+                </a>
+                <a href="{% url 'explore_plans' %}"
+                    class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-lg hover:shadow-xl">
+                    Explore Tax Saving Plans →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tax Saving Tips -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">💡 Tax Saving Tips</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex items-start space-x-3">
+                <span class="text-green-500 text-xl">✓</span>
+                <p class="text-gray-600">Invest up to ₹1.5L in 80C instruments (PPF, ELSS, etc.)</p>
+            </div>
+            <div class="flex items-start space-x-3">
+                <span class="text-green-500 text-xl">✓</span>
+                <p class="text-gray-600">Buy health insurance and claim under Section 80D</p>
+            </div>
+            <div class="flex items-start space-x-3">
+                <span class="text-green-500 text-xl">✓</span>
+                <p class="text-gray-600">Claim HRA exemption if you live in rented house</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
