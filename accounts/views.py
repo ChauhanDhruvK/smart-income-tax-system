@@ -155,6 +155,7 @@ def calculate_tax_view(request):
     total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
     total_deductions = deductions.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
 
+    # Standard Deduction
     standard_deduction = Decimal('50000')
 
     taxable_income = total_income - standard_deduction
@@ -163,31 +164,44 @@ def calculate_tax_view(request):
 
     tax = Decimal('0.00')
 
-    if taxable_income <= 400000:
+    # -------- NEW REGIME SLABS --------
+    if taxable_income <= 300000:
         tax = Decimal('0.00')
 
-    elif taxable_income <= 800000:
-        tax = (taxable_income - 400000) * Decimal('0.05')
+    elif taxable_income <= 600000:
+        tax = (taxable_income - 300000) * Decimal('0.05')
+
+    elif taxable_income <= 900000:
+        tax = (300000 * Decimal('0.05')) + \
+              (taxable_income - 600000) * Decimal('0.10')
 
     elif taxable_income <= 1200000:
-        tax = (400000 * Decimal('0.05')) + \
-              (taxable_income - 800000) * Decimal('0.10')
+        tax = (300000 * Decimal('0.05')) + \
+              (300000 * Decimal('0.10')) + \
+              (taxable_income - 900000) * Decimal('0.15')
 
-    elif taxable_income <= 1600000:
-        tax = (400000 * Decimal('0.05')) + \
-              (400000 * Decimal('0.10')) + \
-              (taxable_income - 1200000) * Decimal('0.15')
+    elif taxable_income <= 1500000:
+        tax = (300000 * Decimal('0.05')) + \
+              (300000 * Decimal('0.10')) + \
+              (300000 * Decimal('0.15')) + \
+              (taxable_income - 1200000) * Decimal('0.20')
 
     else:
-        tax = (400000 * Decimal('0.05')) + \
-              (400000 * Decimal('0.10')) + \
-              (400000 * Decimal('0.15')) + \
-              (400000 * Decimal('0.20')) + \
-              (taxable_income - 1600000) * Decimal('0.30')
+        tax = (300000 * Decimal('0.05')) + \
+              (300000 * Decimal('0.10')) + \
+              (300000 * Decimal('0.15')) + \
+              (300000 * Decimal('0.20')) + \
+              (taxable_income - 1500000) * Decimal('0.30')
 
+    # -------- REBATE 87A --------
+    if taxable_income <= 700000:
+        tax = Decimal('0.00')
+
+    # -------- CESS --------
     cess = tax * Decimal('0.04')
     total_tax = tax + cess
 
+    # Save Record
     TaxRecord.objects.create(
         user=request.user,
         total_income=total_income,
@@ -217,7 +231,6 @@ def explore_plans(request):
     return render(request, 'accounts/explore_plans.html')
 
 
-# ------------------ PLAN DETAIL ------------------
 @login_required
 def plan_detail(request, plan_type):
 
