@@ -1,66 +1,1398 @@
 {% extends 'accounts/base.html' %}
-{% block title %}{{ plan.name }} - Details{% endblock %}
-
+{% block title %}Plan Details{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <a href="{% url 'explore_plans' %}" class="inline-flex items-center text-purple-600 hover:text-purple-700 mb-6">
-        ← Back to Plans
-    </a>
 
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-8 text-white">
-            <div class="text-6xl mb-4">
-                {% if plan_type == 'elss' %}💰
-                {% elif plan_type == 'ppf' %}🏦
-                {% elif plan_type == 'health' %}🏥
-                {% elif plan_type == 'nps' %}📈
-                {% elif plan_type == 'home' %}🏠
-                {% elif plan_type == 'education' %}🎓
-                {% endif %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #fff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --amber-dim: #fef3c7;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07);
+    }
+
+    .pd {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+    }
+
+    .pd-crumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--ink-faint);
+        margin-bottom: 22px;
+    }
+
+    .pd-crumb a {
+        color: var(--ink-faint);
+        text-decoration: none;
+    }
+
+    .pd-crumb a:hover {
+        color: var(--accent);
+    }
+
+    .pd-hero {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: 26px 30px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pd-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 55% 90% at 95% 50%, rgba(37, 99, 235, .22) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .pd-hero-l {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        position: relative;
+    }
+
+    .pd-hero-ic {
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .pd-hero-ic svg {
+        color: #fff;
+    }
+
+    .pd-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .4);
+        margin-bottom: 4px;
+    }
+
+    .pd-name {
+        font-size: 19px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -.02em;
+        margin-bottom: 3px;
+    }
+
+    .pd-sub {
+        font-size: 12.5px;
+        color: rgba(255, 255, 255, .4);
+    }
+
+    .pd-hero-stats {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    .pd-sl {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: rgba(255, 255, 255, .35);
+        margin-bottom: 4px;
+    }
+
+    .pd-sv {
+        font-family: 'DM Mono', monospace;
+        font-size: 21px;
+        font-weight: 500;
+        color: #fff;
+    }
+
+    .pd-layout {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 14px;
+        align-items: start;
+    }
+
+    @media (max-width: 700px) {
+        .pd-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pd-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pd-panel+.pd-panel {
+        margin-top: 14px;
+    }
+
+    .pd-ph {
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .pd-ph svg {
+        color: var(--ink-muted);
+    }
+
+    .pd-pt {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .pd-pb {
+        padding: 18px;
+    }
+
+    .pd-feat {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pd-feat:last-child {
+        border-bottom: none;
+    }
+
+    .pd-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+        margin-top: 6px;
+    }
+
+    .pd-ft {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+
+    .pd-fd {
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        line-height: 1.5;
+    }
+
+    .pd-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pd-step:last-child {
+        border-bottom: none;
+    }
+
+    .pd-sn {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 2px;
+        background: var(--accent-dim);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .pd-stitle {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+
+    .pd-sdesc {
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        line-height: 1.5;
+    }
+
+    .pd-pcg {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    @media (max-width: 480px) {
+        .pd-pcg {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pd-pch {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+        margin-bottom: 10px;
+    }
+
+    .pd-pro,
+    .pd-con {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        line-height: 1.45;
+        margin-bottom: 6px;
+    }
+
+    .pd-pro svg {
+        color: var(--green);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .pd-con svg {
+        color: #dc2626;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .pd-sr {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+    }
+
+    .pd-sr:last-child {
+        border-bottom: none;
+    }
+
+    .pd-sk {
+        color: var(--ink-muted);
+    }
+
+    .pd-sv2 {
+        font-family: 'DM Mono', monospace;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .pd-rt {
+        height: 5px;
+        background: var(--surface-3);
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 8px 0 4px;
+    }
+
+    .pd-rf {
+        height: 100%;
+        border-radius: 99px;
+    }
+
+    .pd-rl {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--ink-faint);
+    }
+
+    .pd-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        background: var(--amber-dim);
+        border: 1px solid #fde68a;
+        border-radius: var(--radius);
+        padding: 11px 13px;
+        font-size: 12px;
+        color: #92400e;
+        line-height: 1.5;
+        margin-top: 14px;
+    }
+
+    .pd-notice svg {
+        flex-shrink: 0;
+        color: #d97706;
+        margin-top: 1px;
+    }
+
+    .pd-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+    }
+
+    .pd-btn {
+        flex: 1;
+        min-width: 130px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 16px;
+        border-radius: 9px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all .15s;
+    }
+
+    .pd-btn-p {
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .pd-btn-p:hover {
+        background: #1a2030;
+    }
+
+    .pd-btn-s {
+        background: var(--surface-2);
+        color: var(--ink-muted);
+        border: 1px solid var(--border);
+    }
+
+    .pd-btn-s:hover {
+        background: var(--surface-3);
+        color: var(--ink);
+    }
+
+    .pd-text {
+        font-size: 13.5px;
+        color: var(--ink-muted);
+        line-height: 1.7;
+    }
+
+    /* icon helpers */
+    .ico {
+        display: inline-flex;
+    }
+</style>
+
+<div class="pd">
+
+    <!-- Breadcrumb -->
+    <div class="pd-crumb">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <a href="{% url 'explore_plans' %}">Plans</a>
+        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span>
+            {% if plan_slug == 'elss' %}ELSS Mutual Funds
+            {% elif plan_slug == 'ppf' %}Public Provident Fund
+            {% elif plan_slug == 'health' %}Health Insurance
+            {% elif plan_slug == 'nps' %}National Pension System
+            {% elif plan_slug == 'home' %}Home Loan
+            {% elif plan_slug == 'education' %}Education Loan
+            {% else %}Plan Details{% endif %}
+        </span>
+    </div>
+
+    <!-- ════════════════ ELSS ════════════════ -->
+    {% if plan_slug == 'elss' %}
+    <div class="pd-hero">
+        <div class="pd-hero-l">
+            <div class="pd-hero-ic"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg></div>
+            <div>
+                <div class="pd-eyebrow">Section 80C</div>
+                <div class="pd-name">ELSS Mutual Funds</div>
+                <div class="pd-sub">Equity Linked Savings Scheme · Highest return potential</div>
             </div>
-            <h1 class="text-3xl font-bold mb-2">{{ plan.name }}</h1>
-            <p class="text-purple-100">{{ plan.desc }}</p>
         </div>
-
-        <div class="p-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Key Features</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span class="text-gray-700">Tax deduction under applicable section</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span class="text-gray-700">Expected returns: {{ plan.return }}</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span class="text-gray-700">Long-term wealth creation</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Tax Benefits</h3>
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <p class="text-purple-700">Save up to ₹46,800 in taxes annually</p>
-                    </div>
-                </div>
+        <div class="pd-hero-stats">
+            <div>
+                <div class="pd-sl">Expected Return</div>
+                <div class="pd-sv">~14%</div>
             </div>
-
-            <div class="mt-8 flex gap-4">
-                <a href="{% url 'calculate_tax' %}"
-                    class="flex-1 bg-purple-600 text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
-                    Calculate Your Tax
-                </a>
-                <a href="{% url 'explore_plans' %}"
-                    class="flex-1 bg-gray-100 text-gray-700 text-center px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-                    Explore More Plans
-                </a>
+            <div>
+                <div class="pd-sl">Max Deduction</div>
+                <div class="pd-sv">₹1,50,000</div>
             </div>
         </div>
     </div>
+    <div class="pd-layout">
+        <div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Overview</span></div>
+                <div class="pd-pb">
+                    <p class="pd-text">ELSS (Equity Linked Savings Scheme) is a mutual fund that invests primarily in
+                        equities. It offers the dual benefit of high return potential and a tax deduction under Section
+                        80C. With the shortest lock-in of just 3 years among all 80C instruments, it suits investors
+                        with a moderate-to-high risk appetite looking to grow wealth while saving tax.</p>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Key Features</span></div>
+                <div class="pd-pb">
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Tax Deduction up to ₹1,50,000</div>
+                            <div class="pd-fd">Invest any amount up to ₹1.5L and claim the full deduction under Section
+                                80C.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Shortest Lock-in: 3 Years</div>
+                            <div class="pd-fd">Among all 80C instruments, ELSS has the shortest mandatory holding
+                                period.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Market-linked Returns</div>
+                            <div class="pd-fd">Historically delivers 12–15% annualised returns. Not guaranteed but
+                                outperforms most fixed instruments over the long term.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">SIP Option Available</div>
+                            <div class="pd-fd">Invest monthly through a Systematic Investment Plan starting from just
+                                ₹500/month.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg><span class="pd-pt">How to Get Started</span></div>
+                <div class="pd-pb">
+                    <div class="pd-step">
+                        <div class="pd-sn">1</div>
+                        <div>
+                            <div class="pd-stitle">Complete KYC</div>
+                            <div class="pd-sdesc">Ensure PAN and Aadhaar are linked. Complete eKYC via any AMC or
+                                KFintech/CAMS portal.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">2</div>
+                        <div>
+                            <div class="pd-stitle">Choose a Fund</div>
+                            <div class="pd-sdesc">Compare top-rated ELSS funds by 3-year and 5-year returns, expense
+                                ratio, and fund manager track record.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">3</div>
+                        <div>
+                            <div class="pd-stitle">Invest Lump Sum or via SIP</div>
+                            <div class="pd-sdesc">Invest directly on the AMC website or through Groww, Zerodha, or your
+                                bank's investment portal.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">4</div>
+                        <div>
+                            <div class="pd-stitle">Save the Proof</div>
+                            <div class="pd-sdesc">Download your investment statement and submit it to your employer
+                                during the declaration window.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg><span class="pd-pt">Pros &amp; Cons</span></div>
+                <div class="pd-pb">
+                    <div class="pd-pcg">
+                        <div>
+                            <div class="pd-pch">Advantages</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Highest return potential among 80C options</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Shortest lock-in: only 3 years</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>SIP from ₹500/month</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Professionally managed</div>
+                        </div>
+                        <div>
+                            <div class="pd-pch">Limitations</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Returns are market-linked, not guaranteed</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>LTCG tax at 10% above ₹1L gain</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Old Tax Regime only</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>NAV fluctuations apply</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-actions">
+                <a href="{% url 'add_deduction' %}" class="pd-btn pd-btn-p"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>Add This Deduction</a>
+                <a href="{% url 'explore_plans' %}" class="pd-btn pd-btn-s"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>All Plans</a>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg><span class="pd-pt">At a Glance</span></div>
+                <div class="pd-pb">
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">80C</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Max Deduction</span><span class="pd-sv2">₹1,50,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Lock-in</span><span class="pd-sv2">3 Years</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Returns</span><span class="pd-sv2"
+                            style="color:var(--green)">~14%</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Tax on Returns</span><span class="pd-sv2">LTCG @10% above
+                            ₹1L</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span
+                                style="font-size:12px;font-weight:600;color:#d97706">Moderate–High</span></div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:75%;background:#d97706"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-notice"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>Returns are indicative. Past performance does not guarantee future results. Consult a financial
+                advisor.</div>
+        </div>
+    </div>
+
+    <!-- ════════════════ PPF ════════════════ -->
+    {% elif plan_slug == 'ppf' %}
+    <div class="pd-hero">
+        <div class="pd-hero-l">
+            <div class="pd-hero-ic"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg></div>
+            <div>
+                <div class="pd-eyebrow">Section 80C</div>
+                <div class="pd-name">Public Provident Fund</div>
+                <div class="pd-sub">Government backed · EEE tax status · Sovereign guarantee</div>
+            </div>
+        </div>
+        <div class="pd-hero-stats">
+            <div>
+                <div class="pd-sl">Interest Rate</div>
+                <div class="pd-sv">7.1%</div>
+            </div>
+            <div>
+                <div class="pd-sl">Max Deduction</div>
+                <div class="pd-sv">₹1,50,000</div>
+            </div>
+        </div>
+    </div>
+    <div class="pd-layout">
+        <div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Overview</span></div>
+                <div class="pd-pb">
+                    <p class="pd-text">PPF is a long-term savings instrument backed by the Government of India. It falls
+                        under the EEE (Exempt-Exempt-Exempt) category — contributions are deductible, interest is
+                        tax-free, and the maturity amount is also tax-free. It is the safest 80C option, ideal for
+                        conservative investors focused on wealth preservation with guaranteed, risk-free returns.</p>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Key Features</span></div>
+                <div class="pd-pb">
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Triple Tax Exemption (EEE)</div>
+                            <div class="pd-fd">Deposit, interest earned, and the final maturity amount are all
+                                completely tax-free.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Zero Risk — Sovereign Guarantee</div>
+                            <div class="pd-fd">Backed by the Government of India. Absolute capital protection with no
+                                default risk.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Loan &amp; Partial Withdrawal</div>
+                            <div class="pd-fd">Loans available from the 3rd year. Partial withdrawals are permitted
+                                after the 7th year.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Extendable in 5-Year Blocks</div>
+                            <div class="pd-fd">After the 15-year maturity, extend in blocks of 5 years with or without
+                                fresh contributions.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg><span class="pd-pt">How to Get Started</span></div>
+                <div class="pd-pb">
+                    <div class="pd-step">
+                        <div class="pd-sn">1</div>
+                        <div>
+                            <div class="pd-stitle">Visit a Bank or Post Office</div>
+                            <div class="pd-sdesc">Open at SBI, HDFC, ICICI, PNB, or any post office. Most banks also
+                                offer online account opening.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">2</div>
+                        <div>
+                            <div class="pd-stitle">Submit KYC Documents</div>
+                            <div class="pd-sdesc">Provide PAN, Aadhaar, passport photo, and fill Form A. The account
+                                opens upon initial deposit.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">3</div>
+                        <div>
+                            <div class="pd-stitle">Make the Initial Deposit</div>
+                            <div class="pd-sdesc">Minimum ₹500 per year; maximum ₹1,50,000. Deposit any time before 31st
+                                March each year.</div>
+                        </div>
+                    </div>
+                    <div class="pd-step">
+                        <div class="pd-sn">4</div>
+                        <div>
+                            <div class="pd-stitle">Collect Passbook</div>
+                            <div class="pd-sdesc">Save your PPF passbook and annual deposit receipts to use as
+                                investment proof for your employer.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg><span class="pd-pt">Pros &amp; Cons</span></div>
+                <div class="pd-pb">
+                    <div class="pd-pcg">
+                        <div>
+                            <div class="pd-pch">Advantages</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Completely tax-free (EEE)</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Zero risk — government backed</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Loan facility from year 3</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Protected from creditors</div>
+                        </div>
+                        <div>
+                            <div class="pd-pch">Limitations</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>15-year lock-in period</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Lower returns vs equity</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Rate revised quarterly by govt</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Old Tax Regime only</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-actions">
+                <a href="{% url 'add_deduction' %}" class="pd-btn pd-btn-p"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>Add This Deduction</a>
+                <a href="{% url 'explore_plans' %}" class="pd-btn pd-btn-s"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>All Plans</a>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg><span class="pd-pt">At a Glance</span></div>
+                <div class="pd-pb">
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">80C</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Max Deduction</span><span class="pd-sv2">₹1,50,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Lock-in</span><span class="pd-sv2">15 Years</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Returns</span><span class="pd-sv2"
+                            style="color:var(--green)">7.1%</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Tax on Returns</span><span class="pd-sv2">Tax-free</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span style="font-size:12px;font-weight:600;color:#16a34a">Very Low</span>
+                        </div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:10%;background:#16a34a"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-notice"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>Interest rate is reviewed and revised by the Government every quarter.</div>
+        </div>
+    </div>
+
+    <!-- ════════════════ HEALTH ════════════════ -->
+    {% elif plan_slug == 'health' %}
+    <div class="pd-hero">
+        <div class="pd-hero-l">
+            <div class="pd-hero-ic"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg></div>
+            <div>
+                <div class="pd-eyebrow">Section 80D</div>
+                <div class="pd-name">Health Insurance</div>
+                <div class="pd-sub">Protect self, family &amp; parents · Preventive care benefits</div>
+            </div>
+        </div>
+        <div class="pd-hero-stats">
+            <div>
+                <div class="pd-sl">Self &amp; Family</div>
+                <div class="pd-sv">₹25,000</div>
+            </div>
+            <div>
+                <div class="pd-sl">Senior Parents</div>
+                <div class="pd-sv">₹50,000</div>
+            </div>
+        </div>
+    </div>
+    <div class="pd-layout">
+        <div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Overview</span></div>
+                <div class="pd-pb">
+                    <p class="pd-text">Section 80D allows deduction on health insurance premiums paid for self, spouse,
+                        children, and parents. You can claim up to ₹25,000 for your own family and an additional ₹50,000
+                        if your parents are senior citizens (60+). Preventive health check-up expenses up to ₹5,000 are
+                        included within this limit. This deduction is available under the Old Tax Regime.</p>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Key Features</span></div>
+                <div class="pd-pb">
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Up to ₹75,000 Combined Deduction</div>
+                            <div class="pd-fd">₹25,000 for self + family, plus ₹50,000 for senior citizen parents =
+                                total ₹75,000.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Preventive Check-ups Included</div>
+                            <div class="pd-fd">Health check-up expenses up to ₹5,000 per year are included within the
+                                80D limit.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Cash Payment Not Allowed</div>
+                            <div class="pd-fd">Premium must be paid via non-cash modes (net banking, cheque, UPI) for
+                                the deduction to be valid.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Multi-year Policy Deduction</div>
+                            <div class="pd-fd">For multi-year policies, deduction is split proportionately over the
+                                policy period.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg><span class="pd-pt">Pros &amp; Cons</span></div>
+                <div class="pd-pb">
+                    <div class="pd-pcg">
+                        <div>
+                            <div class="pd-pch">Advantages</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Financial protection + tax saving</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Extra ₹50,000 for senior parents</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>No lock-in period</div>
+                            <div class="pd-pro"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>Covers preventive check-ups</div>
+                        </div>
+                        <div>
+                            <div class="pd-pch">Limitations</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Old Tax Regime only</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Cash payments not eligible</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>Premium may rise with age</div>
+                            <div class="pd-con"><svg width="13" height="13" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>No investment/return component</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-actions">
+                <a href="{% url 'add_deduction' %}" class="pd-btn pd-btn-p"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>Add This Deduction</a>
+                <a href="{% url 'explore_plans' %}" class="pd-btn pd-btn-s"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>All Plans</a>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg><span class="pd-pt">At a Glance</span></div>
+                <div class="pd-pb">
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">80D</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Self &amp; Family</span><span class="pd-sv2">₹25,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Senior Parents</span><span class="pd-sv2">₹50,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Checkup (within)</span><span class="pd-sv2">₹5,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Lock-in</span><span class="pd-sv2">None</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span style="font-size:12px;font-weight:600;color:#16a34a">Very Low</span>
+                        </div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:5%;background:#16a34a"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-notice"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>Premium amounts and coverage vary by insurer. Compare policies before purchasing.</div>
+        </div>
+    </div>
+
+    <!-- ════════════════ NPS / HOME / EDUCATION — simplified ════════════════ -->
+    {% elif plan_slug == 'nps' or plan_slug == 'home' or plan_slug == 'education' %}
+    <div class="pd-hero">
+        <div class="pd-hero-l">
+            <div class="pd-hero-ic">
+                {% if plan_slug == 'nps' %}<svg width="20" height="20" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {% elif plan_slug == 'home' %}<svg width="20" height="20" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                {% else %}<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+                {% endif %}
+            </div>
+            <div>
+                {% if plan_slug == 'nps' %}
+                <div class="pd-eyebrow">Section 80CCD</div>
+                <div class="pd-name">National Pension System</div>
+                <div class="pd-sub">Build a retirement corpus with market-linked returns</div>
+                {% elif plan_slug == 'home' %}
+                <div class="pd-eyebrow">Section 24 &amp; 80C</div>
+                <div class="pd-name">Home Loan</div>
+                <div class="pd-sub">Dual tax benefit on principal and interest repayment</div>
+                {% else %}
+                <div class="pd-eyebrow">Section 80E</div>
+                <div class="pd-name">Education Loan</div>
+                <div class="pd-sub">Interest deduction on higher education loan — no upper limit</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="pd-hero-stats">
+            {% if plan_slug == 'nps' %}
+            <div>
+                <div class="pd-sl">Expected Return</div>
+                <div class="pd-sv">10–12%</div>
+            </div>
+            <div>
+                <div class="pd-sl">Extra Deduction</div>
+                <div class="pd-sv">₹50,000</div>
+            </div>
+            {% elif plan_slug == 'home' %}
+            <div>
+                <div class="pd-sl">Interest Rate</div>
+                <div class="pd-sv">~8.5%</div>
+            </div>
+            <div>
+                <div class="pd-sl">Max Deduction</div>
+                <div class="pd-sv">₹3,50,000</div>
+            </div>
+            {% else %}
+            <div>
+                <div class="pd-sl">Interest Rate</div>
+                <div class="pd-sv">9–11%</div>
+            </div>
+            <div>
+                <div class="pd-sl">Deduction Limit</div>
+                <div class="pd-sv">No Limit</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="pd-layout">
+        <div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Overview</span></div>
+                <div class="pd-pb">
+                    {% if plan_slug == 'nps' %}
+                    <p class="pd-text">NPS is a government-sponsored pension scheme that helps build a retirement
+                        corpus. Beyond the ₹1.5L Section 80C limit, you can claim an additional ₹50,000 deduction under
+                        Section 80CCD(1B), making the total potential deduction up to ₹2,00,000. Funds are
+                        professionally managed by Pension Fund Managers across equity, corporate bonds, and government
+                        securities.</p>
+                    {% elif plan_slug == 'home' %}
+                    <p class="pd-text">A home loan offers tax benefits on two fronts: the principal repayment qualifies
+                        under Section 80C (up to ₹1,50,000) and the interest paid is deductible under Section 24(b) (up
+                        to ₹2,00,000 for self-occupied property). First-time buyers may also benefit from Section 80EE
+                        for an additional ₹50,000, subject to conditions.</p>
+                    {% else %}
+                    <p class="pd-text">Section 80E allows a deduction on the full interest paid on loans taken for
+                        higher education. There is no upper limit — the entire interest amount in a year is deductible.
+                        The benefit applies for up to 8 consecutive years from the year of first repayment, and covers
+                        courses in India and abroad for self, spouse, or children.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg><span class="pd-pt">Key Features</span></div>
+                <div class="pd-pb">
+                    {% if plan_slug == 'nps' %}
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Additional ₹50,000 via 80CCD(1B)</div>
+                            <div class="pd-fd">Over and above the ₹1.5L 80C limit — effectively reduces taxable income
+                                by up to ₹2L.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Choice of Asset Allocation</div>
+                            <div class="pd-fd">Choose between Active Choice (set your own equity/debt split) or Auto
+                                Choice (lifecycle-based allocation).</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">60% Tax-free Withdrawal at 60</div>
+                            <div class="pd-fd">At retirement, 60% of the corpus can be withdrawn tax-free. The remaining
+                                40% is used to buy an annuity.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Employer Contribution Benefit</div>
+                            <div class="pd-fd">Employer's NPS contribution (up to 10% of basic) is additionally
+                                deductible under Section 80CCD(2).</div>
+                        </div>
+                    </div>
+                    {% elif plan_slug == 'home' %}
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Principal Deduction under 80C</div>
+                            <div class="pd-fd">Principal repayment up to ₹1,50,000 is deductible under Section 80C
+                                alongside other 80C investments.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Interest Deduction under Section 24</div>
+                            <div class="pd-fd">Interest paid on a home loan for self-occupied property is deductible up
+                                to ₹2,00,000 per year.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Pre-construction Interest</div>
+                            <div class="pd-fd">Interest paid during construction can be claimed in 5 equal instalments
+                                after possession, within the ₹2L cap.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Let-out Property</div>
+                            <div class="pd-fd">For rented property, the entire home loan interest is deductible without
+                                any limit under Section 24.</div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">No Upper Limit on Deduction</div>
+                            <div class="pd-fd">Unlike most deductions, the entire interest paid in a year is claimable
+                                under Section 80E with no cap.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Available for 8 Years</div>
+                            <div class="pd-fd">Deduction can be claimed for up to 8 consecutive assessment years from
+                                the year repayment begins.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Covers India &amp; Abroad</div>
+                            <div class="pd-fd">Applicable for full-time higher education courses in India as well as
+                                overseas.</div>
+                        </div>
+                    </div>
+                    <div class="pd-feat">
+                        <div class="pd-dot"></div>
+                        <div>
+                            <div class="pd-ft">Loans for Family Members</div>
+                            <div class="pd-fd">Loans taken for self, spouse, children, or a student for whom the
+                                taxpayer is the legal guardian qualify.</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="pd-actions">
+                <a href="{% url 'add_deduction' %}" class="pd-btn pd-btn-p"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>Add This Deduction</a>
+                <a href="{% url 'explore_plans' %}" class="pd-btn pd-btn-s"><svg width="14" height="14" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>All Plans</a>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="pd-panel">
+                <div class="pd-ph"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg><span class="pd-pt">At a Glance</span></div>
+                <div class="pd-pb">
+                    {% if plan_slug == 'nps' %}
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">80CCD(1B)</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Extra Deduction</span><span class="pd-sv2">₹50,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Lock-in</span><span class="pd-sv2">Till age 60</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Returns</span><span class="pd-sv2"
+                            style="color:var(--green)">10–12%</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Tax-free Withdrawal</span><span class="pd-sv2">60% at
+                            maturity</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span style="font-size:12px;font-weight:600;color:#d97706">Moderate</span>
+                        </div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:50%;background:#d97706"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                    {% elif plan_slug == 'home' %}
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">24 &amp; 80C</span></div>
+                    <div class="pd-sr"><span class="pd-sk">80C Deduction</span><span class="pd-sv2">₹1,50,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Sec 24 Deduction</span><span class="pd-sv2">₹2,00,000</span>
+                    </div>
+                    <div class="pd-sr"><span class="pd-sk">Interest Rate</span><span class="pd-sv2"
+                            style="color:var(--green)">~8.5%</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Lock-in</span><span class="pd-sv2">Loan tenure</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span style="font-size:12px;font-weight:600;color:#16a34a">Low</span></div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:20%;background:#16a34a"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                    {% else %}
+                    <div class="pd-sr"><span class="pd-sk">Section</span><span class="pd-sv2"
+                            style="color:var(--accent)">80E</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Deduction Limit</span><span class="pd-sv2"
+                            style="color:var(--green)">No limit</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Available For</span><span class="pd-sv2">8 Years</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Interest Rate</span><span class="pd-sv2">9–11%</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Tax on Returns</span><span class="pd-sv2">N/A</span></div>
+                    <div class="pd-sr"><span class="pd-sk">Regime</span><span class="pd-sv2">Old only</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span
+                                style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)">Risk
+                                Level</span><span style="font-size:12px;font-weight:600;color:#16a34a">Very Low</span>
+                        </div>
+                        <div class="pd-rt">
+                            <div class="pd-rf" style="width:10%;background:#16a34a"></div>
+                        </div>
+                        <div class="pd-rl"><span>Low</span><span>Medium</span><span>High</span></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="pd-notice"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>Consult a financial advisor before making investment or loan decisions.</div>
+        </div>
+    </div>
+
+    {% else %}
+    <div style="text-align:center;padding:60px 20px;color:var(--ink-muted);">
+        <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            style="margin:0 auto 16px;display:block;opacity:.3;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px;">Plan not found</p>
+        <p style="font-size:13px;margin-bottom:20px;">The requested plan does not exist.</p>
+        <a href="{% url 'explore_plans' %}" class="pd-btn pd-btn-p" style="display:inline-flex;max-width:180px;">View
+            All Plans</a>
+    </div>
+    {% endif %}
+
 </div>
+
 {% endblock %}

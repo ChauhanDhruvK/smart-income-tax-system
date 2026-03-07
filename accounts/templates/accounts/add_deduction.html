@@ -2,343 +2,778 @@
 {% block title %}Add Deduction{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto">
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
-            <h1 class="text-2xl font-bold">Add Tax Deduction</h1>
-            <p class="text-purple-100">Select the type of deduction you want to claim</p>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --accent-dark: #1d4ed8;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --amber: #d97706;
+        --amber-dim: #fef3c7;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .05);
+    }
+
+    .ad-root {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+    }
+
+    /* ── Header ── */
+    .ad-header {
+        margin-bottom: 24px;
+    }
+
+    .ad-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+    }
+
+    .ad-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 4px;
+        letter-spacing: -.02em;
+    }
+
+    .ad-subtitle {
+        font-size: 13.5px;
+        color: var(--ink-muted);
+    }
+
+    /* ── Layout ── */
+    .ad-layout {
+        display: grid;
+        grid-template-columns: 1fr 244px;
+        gap: 16px;
+        align-items: start;
+    }
+
+    @media (max-width: 680px) {
+        .ad-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Form card ── */
+    .ad-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ad-card-body {
+        padding: 24px;
+    }
+
+    /* ── Form elements ── */
+    .ad-field {
+        margin-bottom: 18px;
+    }
+
+    .ad-field:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .ad-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+        margin-bottom: 7px;
+    }
+
+    .ad-select,
+    .ad-input,
+    .ad-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        color: var(--ink);
+        background: var(--surface);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .ad-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa1b1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+
+    .ad-select:focus,
+    .ad-input:focus,
+    .ad-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+    }
+
+    .ad-select option,
+    .ad-select optgroup {
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .ad-textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    /* ── Description box ── */
+    .ad-desc-box {
+        display: none;
+        background: var(--accent-dim);
+        border: 1px solid #bfdbfe;
+        border-radius: var(--radius);
+        padding: 13px 15px;
+        margin-top: 10px;
+    }
+
+    .ad-desc-box.visible {
+        display: block;
+    }
+
+    .ad-desc-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-dark);
+        margin-bottom: 4px;
+    }
+
+    .ad-desc-text {
+        font-size: 12.5px;
+        color: #1e40af;
+        margin-bottom: 5px;
+        line-height: 1.5;
+    }
+
+    .ad-desc-limit {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Row (two inputs side by side) ── */
+    .ad-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+        .ad-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Divider ── */
+    .ad-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 20px 0;
+    }
+
+    /* ── Buttons ── */
+    .ad-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .ad-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 18px;
+        border-radius: 9px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all .15s;
+    }
+
+    .ad-btn-primary {
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .ad-btn-primary:hover {
+        background: #1a2030;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+    }
+
+    .ad-btn-secondary {
+        background: var(--surface-2);
+        color: var(--ink-muted);
+        border: 1px solid var(--border);
+    }
+
+    .ad-btn-secondary:hover {
+        background: var(--surface-3);
+        color: var(--ink);
+    }
+
+    /* ── Sidebar ── */
+    .ad-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ad-info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ad-info-card-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .ad-info-card-header svg {
+        color: var(--ink-muted);
+        flex-shrink: 0;
+    }
+
+    .ad-info-card-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+    }
+
+    .ad-info-card-body {
+        padding: 14px 16px;
+    }
+
+    .ad-limit-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 7px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+    }
+
+    .ad-limit-row:last-child {
+        border-bottom: none;
+    }
+
+    .ad-limit-sec {
+        color: var(--ink-muted);
+        font-weight: 500;
+    }
+
+    .ad-limit-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 11.5px;
+        color: var(--ink);
+        font-weight: 500;
+    }
+
+    .ad-limit-val.unlimited {
+        color: var(--green);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px;
+    }
+
+    .ad-tips {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .ad-tip {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        line-height: 1.45;
+    }
+
+    .ad-tip:last-child {
+        border-bottom: none;
+    }
+
+    .ad-tip-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--ink-faint);
+        margin-top: 1px;
+    }
+
+    /* ── Help section ── */
+    .ad-help {
+        margin-top: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ad-help-header {
+        padding: 13px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ad-help-header svg {
+        color: var(--ink-muted);
+    }
+
+    .ad-help-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .ad-help-body {
+        padding: 18px 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 500px) {
+        .ad-help-body {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ad-help-group-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+        margin-bottom: 10px;
+    }
+
+    .ad-help-item {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 9px;
+        font-size: 12.5px;
+    }
+
+    .ad-help-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .ad-help-item strong {
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 1px;
+    }
+
+    .ad-help-item span {
+        color: var(--ink-muted);
+        line-height: 1.4;
+    }
+</style>
+
+<div class="ad-root">
+
+    <!-- Header -->
+    <div class="ad-header">
+        <div class="ad-eyebrow">Income Tax · FY 2024–25</div>
+        <h1 class="ad-title">Add Tax Deduction</h1>
+        <p class="ad-subtitle">Select the deduction type and enter the claimed amount</p>
+    </div>
+
+    <!-- Layout -->
+    <div class="ad-layout">
+
+        <!-- Form -->
+        <div class="ad-card">
+            <div class="ad-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Deduction type -->
+                    <div class="ad-field">
+                        <label class="ad-label" for="section">Deduction Type</label>
+                        <select name="section" id="section" class="ad-select" required onchange="updateDescription()">
+                            <option value="">Select a deduction category…</option>
+
+                            <optgroup label="Section 80C — Investments (Up to ₹1.5L)">
+                                <option value="PPF">Public Provident Fund (PPF)</option>
+                                <option value="ELSS">ELSS Mutual Funds</option>
+                                <option value="Life Insurance">Life Insurance Premium</option>
+                                <option value="EPF">Employee Provident Fund (EPF)</option>
+                                <option value="VPF">Voluntary Provident Fund (VPF)</option>
+                                <option value="Sukanya Samriddhi">Sukanya Samriddhi Account</option>
+                                <option value="NSC">National Savings Certificate (NSC)</option>
+                                <option value="Tax Saving FD">5-Year Tax Saving FD</option>
+                                <option value="Home Loan Principal">Home Loan Principal Repayment</option>
+                                <option value="Children Tuition">Children's Tuition Fees</option>
+                                <option value="Stamp Duty">Stamp Duty &amp; Registration</option>
+                            </optgroup>
+
+                            <optgroup label="Section 80D — Health Insurance">
+                                <option value="Health Insurance Self">Health Insurance — Self &amp; Family</option>
+                                <option value="Health Insurance Parents">Health Insurance — Parents (Senior Citizen)
+                                </option>
+                                <option value="Preventive Health Checkup">Preventive Health Check-up</option>
+                            </optgroup>
+
+                            <optgroup label="Section 24 — Home Loan Interest">
+                                <option value="Home Loan Interest">Home Loan Interest Payment</option>
+                                <option value="Pre-construction Interest">Pre-construction Interest</option>
+                            </optgroup>
+
+                            <optgroup label="Section 80E — Education Loan">
+                                <option value="Education Loan Interest">Education Loan Interest</option>
+                            </optgroup>
+
+                            <optgroup label="Section 80DDB — Medical Treatment">
+                                <option value="Medical Treatment Self">Medical Treatment — Self / Dependent</option>
+                                <option value="Medical Treatment Senior">Medical Treatment — Senior Citizen</option>
+                                <option value="Medical Treatment Super Senior">Medical Treatment — Very Senior Citizen
+                                </option>
+                            </optgroup>
+
+                            <optgroup label="Section 80G — Donations">
+                                <option value="Donation 100">Donations (100% Deduction)</option>
+                                <option value="Donation 50">Donations (50% Deduction)</option>
+                            </optgroup>
+
+                            <optgroup label="Section 80TTB — Senior Citizens">
+                                <option value="Interest Income Senior">Interest Income (Senior Citizens)</option>
+                            </optgroup>
+
+                            <optgroup label="Other Deductions">
+                                <option value="NPS Additional">NPS Additional — Sec 80CCD(1B)</option>
+                                <option value="Disabled Dependent">Disabled Dependent — Sec 80DD</option>
+                                <option value="Severe Disability">Severe Disability — Sec 80U</option>
+                                <option value="Rent Paid">Rent Paid (HRA Exemption)</option>
+                            </optgroup>
+                        </select>
+
+                        <!-- Dynamic description -->
+                        <div class="ad-desc-box" id="descriptionBox">
+                            <div class="ad-desc-title" id="sectionTitle"></div>
+                            <div class="ad-desc-text" id="sectionDesc"></div>
+                            <div class="ad-desc-limit">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span id="sectionLimit"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ad-divider"></div>
+
+                    <!-- Amount + Date -->
+                    <div class="ad-row">
+                        <div class="ad-field">
+                            <label class="ad-label" for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" name="amount" step="0.01" min="0" placeholder="0.00"
+                                class="ad-input" required>
+                        </div>
+                        <div class="ad-field">
+                            <label class="ad-label" for="date">Date</label>
+                            <input type="date" id="date" name="date" value="{% now 'Y-m-d' %}" class="ad-input"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="ad-field" style="margin-top:4px;">
+                        <label class="ad-label" for="description">Notes <span
+                                style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-faint)">(optional)</span></label>
+                        <textarea id="description" name="description" class="ad-textarea"
+                            placeholder="Any additional details or references…"></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="ad-actions">
+                        <button type="submit" class="ad-btn ad-btn-primary">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Deduction
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="ad-btn ad-btn-secondary">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div class="p-6">
-            <form method="POST">
-                {% csrf_token %}
+        <!-- Sidebar -->
+        <div class="ad-sidebar">
 
-                <!-- Deduction Category Selection -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Deduction Type</label>
-                    <select name="section" id="section"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required onchange="updateDescription()">
-                        <option value="">Choose a deduction category...</option>
-
-                        <optgroup label="💰 Section 80C - Investments (Up to ₹1.5 lakh)">
-                            <option value="PPF">Public Provident Fund (PPF)</option>
-                            <option value="ELSS">ELSS Mutual Funds</option>
-                            <option value="Life Insurance">Life Insurance Premium</option>
-                            <option value="EPF">Employee Provident Fund (EPF)</option>
-                            <option value="VPF">Voluntary Provident Fund (VPF)</option>
-                            <option value="Sukanya Samriddhi">Sukanya Samriddhi Account</option>
-                            <option value="NSC">National Savings Certificate (NSC)</option>
-                            <option value="Tax Saving FD">5-Year Tax Saving Fixed Deposit</option>
-                            <option value="Home Loan Principal">Home Loan Principal Repayment</option>
-                            <option value="Children Tuition">Children's Tuition Fees</option>
-                            <option value="Stamp Duty">Stamp Duty & Registration Charges</option>
-                        </optgroup>
-
-                        <optgroup label="🏥 Section 80D - Health Insurance">
-                            <option value="Health Insurance Self">Health Insurance - Self & Family</option>
-                            <option value="Health Insurance Parents">Health Insurance - Parents (Senior Citizen)
-                            </option>
-                            <option value="Preventive Health Checkup">Preventive Health Check-up</option>
-                        </optgroup>
-
-                        <optgroup label="🏠 Section 24 - Home Loan Interest">
-                            <option value="Home Loan Interest">Home Loan Interest Payment</option>
-                            <option value="Pre-construction Interest">Pre-construction Interest</option>
-                        </optgroup>
-
-                        <optgroup label="🎓 Section 80E - Education Loan">
-                            <option value="Education Loan Interest">Education Loan Interest</option>
-                        </optgroup>
-
-                        <optgroup label="💊 Section 80DDB - Medical Treatment">
-                            <option value="Medical Treatment Self">Medical Treatment - Self/Dependent</option>
-                            <option value="Medical Treatment Senior">Medical Treatment - Senior Citizen</option>
-                            <option value="Medical Treatment Super Senior">Medical Treatment - Very Senior Citizen
-                            </option>
-                        </optgroup>
-
-                        <optgroup label="❤️ Section 80G - Donations">
-                            <option value="Donation 100">Donations (100% Deduction)</option>
-                            <option value="Donation 50">Donations (50% Deduction)</option>
-                        </optgroup>
-
-                        <optgroup label="🧓 Section 80TTB - Senior Citizens">
-                            <option value="Interest Income Senior">Interest Income (Senior Citizens)</option>
-                        </optgroup>
-
-                        <optgroup label="👨‍👩‍👧 Other Deductions">
-                            <option value="NPS Additional">NPS Additional (Sec 80CCD(1B))</option>
-                            <option value="Disabled Dependent">Care of Disabled Dependent (Sec 80DD)</option>
-                            <option value="Severe Disability">Severe Disability (Sec 80U)</option>
-                            <option value="Rent Paid">Rent Paid (HRA Exemption)</option>
-                        </optgroup>
-                    </select>
+            <!-- Section limits -->
+            <div class="ad-info-card">
+                <div class="ad-info-card-header">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span class="ad-info-card-title">Section Limits</span>
                 </div>
-
-                <!-- Dynamic Description Box -->
-                <div id="descriptionBox" class="mb-6 p-4 bg-purple-50 rounded-lg hidden">
-                    <h4 class="font-semibold text-purple-800 mb-2" id="sectionTitle"></h4>
-                    <p class="text-purple-600 text-sm" id="sectionDesc"></p>
-                    <p class="text-sm text-purple-500 mt-2" id="sectionLimit"></p>
-                </div>
-
-                <!-- Amount Input -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
-                    <input type="number" name="amount" step="0.01" min="0" placeholder="Enter amount"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required>
-                </div>
-
-                <!-- Date Input -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                    <input type="date" name="date" value="{% now 'Y-m-d' %}"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required>
-                </div>
-
-                <!-- Description -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes (Optional)</label>
-                    <textarea name="description" rows="3" placeholder="Add any additional details..."
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
-                </div>
-
-                <!-- Quick Info Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-green-700 text-sm mb-1">💡 Section 80C</h4>
-                        <p class="text-xs text-green-600">Maximum deduction: ₹1,50,000</p>
-                        <p class="text-xs text-green-500">PPF, ELSS, Life Insurance, etc.</p>
+                <div class="ad-info-card-body">
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80C</span>
+                        <span class="ad-limit-val">₹1,50,000</span>
                     </div>
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-blue-700 text-sm mb-1">🏥 Section 80D</h4>
-                        <p class="text-xs text-blue-600">Self: ₹25,000 | Parents: ₹50,000</p>
-                        <p class="text-xs text-blue-500">Health insurance premiums</p>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80D (self)</span>
+                        <span class="ad-limit-val">₹25,000</span>
                     </div>
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-purple-700 text-sm mb-1">🏠 Section 24</h4>
-                        <p class="text-xs text-purple-600">Home loan interest: Up to ₹2,00,000</p>
-                        <p class="text-xs text-purple-500">For self-occupied property</p>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80D (parents)</span>
+                        <span class="ad-limit-val">₹50,000</span>
+                    </div>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 24 (HLI)</span>
+                        <span class="ad-limit-val">₹2,00,000</span>
+                    </div>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80CCD(1B)</span>
+                        <span class="ad-limit-val">₹50,000</span>
+                    </div>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80TTB</span>
+                        <span class="ad-limit-val">₹50,000</span>
+                    </div>
+                    <div class="ad-limit-row">
+                        <span class="ad-limit-sec">Sec 80E</span>
+                        <span class="ad-limit-val unlimited">No limit</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="flex gap-4">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
-                        Add Deduction
-                    </button>
-                    <a href="{% url 'dashboard' %}"
-                        class="flex-1 bg-gray-100 text-gray-700 text-center px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-                        Cancel
-                    </a>
+            <!-- Tips -->
+            <div class="ad-info-card">
+                <div class="ad-info-card-header">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span class="ad-info-card-title">Quick Tips</span>
                 </div>
-            </form>
+                <div class="ad-info-card-body">
+                    <div class="ad-tips">
+                        <div class="ad-tip">
+                            <div class="ad-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Keep all investment proofs and receipts handy
+                        </div>
+                        <div class="ad-tip">
+                            <div class="ad-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Multiple 80C instruments can be combined up to ₹1.5L
+                        </div>
+                        <div class="ad-tip">
+                            <div class="ad-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Senior citizens receive higher deduction limits
+                        </div>
+                        <div class="ad-tip">
+                            <div class="ad-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Deductions apply only under the Old Tax Regime
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Help Section -->
-    <div class="mt-8 bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">📚 Understanding Tax Deductions</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Help section -->
+    <div class="ad-help">
+        <div class="ad-help-header">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span class="ad-help-title">Understanding Tax Deductions</span>
+        </div>
+        <div class="ad-help-body">
             <div>
-                <h4 class="font-medium text-purple-600 mb-2">Popular Deductions</h4>
-                <ul class="space-y-2 text-sm text-gray-600">
-                    <li>• <span class="font-medium">Section 80C:</span> Investments in PPF, ELSS, Life Insurance, etc.
-                        (Max ₹1.5L)</li>
-                    <li>• <span class="font-medium">Section 80D:</span> Health insurance premiums for self & family</li>
-                    <li>• <span class="font-medium">Section 24:</span> Interest on home loan (Max ₹2L for self-occupied)
-                    </li>
-                    <li>• <span class="font-medium">Section 80E:</span> Interest on education loans</li>
-                </ul>
+                <div class="ad-help-group-title">Popular Deductions</div>
+                <div class="ad-help-item">
+                    <strong>Section 80C</strong>
+                    <span>PPF, ELSS, Life Insurance, EPF — max ₹1,50,000</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 80D</strong>
+                    <span>Health insurance for self (₹25k) and parents (₹50k)</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 24</strong>
+                    <span>Home loan interest up to ₹2,00,000 for self-occupied</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 80E</strong>
+                    <span>Education loan interest — no upper limit</span>
+                </div>
             </div>
             <div>
-                <h4 className="font-medium text-purple-600 mb-2">Quick Tips</h4>
-                <ul class="space-y-2 text-sm text-gray-600">
-                    <li>• Keep all investment proofs ready</li>
-                    <li>• Check maximum limit for each section</li>
-                    <li>• Combine multiple 80C investments up to ₹1.5L</li>
-                    <li>• Senior citizens get higher deduction limits</li>
-                </ul>
+                <div class="ad-help-group-title">Less-known Sections</div>
+                <div class="ad-help-item">
+                    <strong>Section 80CCD(1B)</strong>
+                    <span>NPS contributions over and above 80C limit — ₹50,000</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 80G</strong>
+                    <span>Donations to approved institutions — 50% or 100%</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 80TTB</strong>
+                    <span>Interest income deduction for senior citizens — ₹50,000</span>
+                </div>
+                <div class="ad-help-item">
+                    <strong>Section 80DD / 80U</strong>
+                    <span>Care of disabled dependents or self-disability</span>
+                </div>
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
     const sectionDescriptions = {
-        // 80C Options
-        'PPF': {
-            title: 'Public Provident Fund (PPF)',
-            desc: 'Government-backed long-term savings scheme with tax-free returns. Lock-in period: 15 years.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'ELSS': {
-            title: 'ELSS Mutual Funds',
-            desc: 'Equity Linked Savings Scheme with highest returns potential. Lock-in period: 3 years only.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Life Insurance': {
-            title: 'Life Insurance Premium',
-            desc: 'Premium paid for life insurance policies for self, spouse, or children.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'EPF': {
-            title: 'Employee Provident Fund',
-            desc: 'Your contribution to EPF account. Automatically deducted from salary.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'VPF': {
-            title: 'Voluntary Provident Fund',
-            desc: 'Voluntary contribution above EPF to your PF account.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Sukanya Samriddhi': {
-            title: 'Sukanya Samriddhi Account',
-            desc: 'Savings scheme for girl child education and marriage. Tax-free returns.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'NSC': {
-            title: 'National Savings Certificate',
-            desc: 'Small savings scheme with guaranteed returns. Interest is reinvested.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Tax Saving FD': {
-            title: '5-Year Tax Saving Fixed Deposit',
-            desc: 'Bank FD with 5-year lock-in period. Interest is taxable.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Home Loan Principal': {
-            title: 'Home Loan Principal Repayment',
-            desc: 'Principal portion of your home loan EMI.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Children Tuition': {
-            title: "Children's Tuition Fees",
-            desc: 'Tuition fees for children\'s education (max 2 children).',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-        'Stamp Duty': {
-            title: 'Stamp Duty & Registration',
-            desc: 'Expenses for property registration and stamp duty.',
-            limit: 'Maximum deduction under Section 80C: ₹1,50,000'
-        },
-
-        // 80D Options
-        'Health Insurance Self': {
-            title: 'Health Insurance - Self & Family',
-            desc: 'Premium paid for health insurance for self, spouse, and children.',
-            limit: 'Maximum deduction under Section 80D: ₹25,000'
-        },
-        'Health Insurance Parents': {
-            title: 'Health Insurance - Parents',
-            desc: 'Premium paid for health insurance for parents.',
-            limit: 'Maximum deduction under Section 80D: ₹50,000 (if parents are senior citizens)'
-        },
-        'Preventive Health Checkup': {
-            title: 'Preventive Health Check-up',
-            desc: 'Expenses for preventive health check-ups for self or family.',
-            limit: 'Maximum deduction under Section 80D: ₹5,000 (within overall limit)'
-        },
-
-        // Section 24
-        'Home Loan Interest': {
-            title: 'Home Loan Interest',
-            desc: 'Interest portion of home loan EMI for self-occupied property.',
-            limit: 'Maximum deduction under Section 24: ₹2,00,000'
-        },
-        'Pre-construction Interest': {
-            title: 'Pre-construction Interest',
-            desc: 'Interest paid during construction period (deductible in 5 equal installments).',
-            limit: 'Maximum deduction under Section 24: ₹2,00,000 (aggregate)'
-        },
-
-        // Education Loan
-        'Education Loan Interest': {
-            title: 'Education Loan Interest',
-            desc: 'Interest paid on loan taken for higher education (self, spouse, or children).',
-            limit: 'No upper limit under Section 80E'
-        },
-
-        // Medical Treatment
-        'Medical Treatment Self': {
-            title: 'Medical Treatment - Self/Dependent',
-            desc: 'Expenses for medical treatment of self or dependent with disability.',
-            limit: 'Fixed deduction of ₹75,000 under Section 80DDB'
-        },
-        'Medical Treatment Senior': {
-            title: 'Medical Treatment - Senior Citizen',
-            desc: 'Medical treatment expenses for senior citizens.',
-            limit: 'Fixed deduction of ₹1,00,000 under Section 80DDB'
-        },
-
-        // Donations
-        'Donation 100': {
-            title: 'Donations (100% Deduction)',
-            desc: 'Donations to specified funds like PM Relief Fund, etc.',
-            limit: 'Varies by donation type under Section 80G'
-        },
-        'Donation 50': {
-            title: 'Donations (50% Deduction)',
-            desc: 'Donations to specified charitable institutions.',
-            limit: '50% of donation amount under Section 80G'
-        },
-
-        // Senior Citizens
-        'Interest Income Senior': {
-            title: 'Interest Income (Senior Citizens)',
-            desc: 'Interest income from savings accounts, FDs, etc.',
-            limit: 'Maximum deduction under Section 80TTB: ₹50,000'
-        },
-
-        // Other Deductions
-        'NPS Additional': {
-            title: 'NPS Additional Contribution',
-            desc: 'Additional contribution to National Pension System beyond 80C.',
-            limit: 'Maximum deduction under Section 80CCD(1B): ₹50,000'
-        },
-        'Disabled Dependent': {
-            title: 'Care of Disabled Dependent',
-            desc: 'Expenses for maintenance of dependent with disability.',
-            limit: 'Fixed deduction of ₹75,000 under Section 80DD (₹1,25,000 for severe disability)'
-        },
-        'Severe Disability': {
-            title: 'Severe Disability (Self)',
-            desc: 'Deduction for individual with disability.',
-            limit: 'Fixed deduction of ₹75,000 under Section 80U (₹1,25,000 for severe disability)'
-        },
-        'Rent Paid': {
-            title: 'Rent Paid (HRA Exemption)',
-            desc: 'Rent paid if HRA is not received or for claiming HRA exemption.',
-            limit: 'Actual rent paid minus 10% of salary'
-        }
+        'PPF': { title: 'Public Provident Fund (PPF)', desc: 'Government-backed long-term savings with tax-free returns. Lock-in: 15 years.', limit: 'Section 80C — max ₹1,50,000' },
+        'ELSS': { title: 'ELSS Mutual Funds', desc: 'Equity Linked Savings Scheme with high return potential. Shortest lock-in: 3 years.', limit: 'Section 80C — max ₹1,50,000' },
+        'Life Insurance': { title: 'Life Insurance Premium', desc: 'Premiums paid for life insurance for self, spouse, or children.', limit: 'Section 80C — max ₹1,50,000' },
+        'EPF': { title: 'Employee Provident Fund', desc: 'Your share of EPF contribution automatically deducted from salary.', limit: 'Section 80C — max ₹1,50,000' },
+        'VPF': { title: 'Voluntary Provident Fund', desc: 'Voluntary contribution above the mandatory EPF amount.', limit: 'Section 80C — max ₹1,50,000' },
+        'Sukanya Samriddhi': { title: 'Sukanya Samriddhi Account', desc: 'Savings scheme for a girl child\'s education and marriage. Tax-free returns.', limit: 'Section 80C — max ₹1,50,000' },
+        'NSC': { title: 'National Savings Certificate', desc: 'Small savings instrument with guaranteed returns. Interest is reinvested.', limit: 'Section 80C — max ₹1,50,000' },
+        'Tax Saving FD': { title: '5-Year Tax Saving Fixed Deposit', desc: 'Bank FD with a mandatory 5-year lock-in. Interest is taxable.', limit: 'Section 80C — max ₹1,50,000' },
+        'Home Loan Principal': { title: 'Home Loan Principal Repayment', desc: 'Principal portion of your home loan EMI qualifies for deduction.', limit: 'Section 80C — max ₹1,50,000' },
+        'Children Tuition': { title: "Children's Tuition Fees", desc: 'Tuition fees paid for up to 2 children at recognised institutions.', limit: 'Section 80C — max ₹1,50,000' },
+        'Stamp Duty': { title: 'Stamp Duty & Registration', desc: 'Stamp duty and registration charges paid for property purchase.', limit: 'Section 80C — max ₹1,50,000' },
+        'Health Insurance Self': { title: 'Health Insurance — Self & Family', desc: 'Premium for medical insurance covering self, spouse, and children.', limit: 'Section 80D — max ₹25,000' },
+        'Health Insurance Parents': { title: 'Health Insurance — Parents', desc: 'Premium for parents\' health insurance. Higher limit if parents are senior citizens.', limit: 'Section 80D — max ₹50,000 (senior citizen parents)' },
+        'Preventive Health Checkup': { title: 'Preventive Health Check-up', desc: 'Expenses for preventive check-ups for self, spouse, children, or parents.', limit: 'Section 80D — max ₹5,000 (within overall 80D limit)' },
+        'Home Loan Interest': { title: 'Home Loan Interest', desc: 'Interest portion of EMI for a self-occupied residential property.', limit: 'Section 24 — max ₹2,00,000' },
+        'Pre-construction Interest': { title: 'Pre-construction Interest', desc: 'Interest paid during construction, deductible in 5 equal annual instalments.', limit: 'Section 24 — max ₹2,00,000 (aggregate)' },
+        'Education Loan Interest': { title: 'Education Loan Interest', desc: 'Interest on loan for higher education of self, spouse, or children. No upper limit.', limit: 'Section 80E — no upper limit' },
+        'Medical Treatment Self': { title: 'Medical Treatment — Self / Dependent', desc: 'Treatment expenses for specified diseases for self or dependent.', limit: 'Section 80DDB — fixed ₹75,000' },
+        'Medical Treatment Senior': { title: 'Medical Treatment — Senior Citizen', desc: 'Medical treatment for a senior citizen dependent or self.', limit: 'Section 80DDB — fixed ₹1,00,000' },
+        'Medical Treatment Super Senior': { title: 'Medical Treatment — Very Senior Citizen', desc: 'Medical treatment for individuals above 80 years.', limit: 'Section 80DDB — fixed ₹1,00,000' },
+        'Donation 100': { title: 'Donations (100% Deduction)', desc: 'Contributions to PM Relief Fund or other specified national funds.', limit: 'Section 80G — 100% of donation amount' },
+        'Donation 50': { title: 'Donations (50% Deduction)', desc: 'Contributions to approved charitable institutions.', limit: 'Section 80G — 50% of donation amount' },
+        'Interest Income Senior': { title: 'Interest Income — Senior Citizens', desc: 'Interest from savings accounts and FDs for individuals aged 60 and above.', limit: 'Section 80TTB — max ₹50,000' },
+        'NPS Additional': { title: 'NPS Additional Contribution', desc: 'Employee\'s own contribution to NPS, over and above the 80C limit.', limit: 'Section 80CCD(1B) — max ₹50,000' },
+        'Disabled Dependent': { title: 'Care of Disabled Dependent', desc: 'Maintenance and medical care expenses for a dependent with disability.', limit: 'Section 80DD — ₹75,000 (₹1,25,000 for severe disability)' },
+        'Severe Disability': { title: 'Severe Disability — Self', desc: 'Fixed deduction for individuals with certified disability.', limit: 'Section 80U — ₹75,000 (₹1,25,000 for severe disability)' },
+        'Rent Paid': { title: 'Rent Paid (HRA Exemption)', desc: 'For salaried employees without HRA component or self-employed individuals.', limit: 'Actual rent minus 10% of basic salary' }
     };
 
     function updateDescription() {
-        const select = document.getElementById('section');
+        const val = document.getElementById('section').value;
         const box = document.getElementById('descriptionBox');
-        const title = document.getElementById('sectionTitle');
-        const desc = document.getElementById('sectionDesc');
-        const limit = document.getElementById('sectionLimit');
-
-        const selected = select.value;
-
-        if (selected && sectionDescriptions[selected]) {
-            const info = sectionDescriptions[selected];
-            title.textContent = info.title;
-            desc.textContent = info.desc;
-            limit.textContent = info.limit;
-            box.classList.remove('hidden');
+        if (val && sectionDescriptions[val]) {
+            const d = sectionDescriptions[val];
+            document.getElementById('sectionTitle').textContent = d.title;
+            document.getElementById('sectionDesc').textContent = d.desc;
+            document.getElementById('sectionLimit').textContent = d.limit;
+            box.classList.add('visible');
         } else {
-            box.classList.add('hidden');
+            box.classList.remove('visible');
         }
     }
 
-    // Trigger on page load if value exists
-    document.addEventListener('DOMContentLoaded', function () {
-        updateDescription();
-    });
+    document.addEventListener('DOMContentLoaded', updateDescription);
 </script>
 {% endblock %}

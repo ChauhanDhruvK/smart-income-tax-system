@@ -1,143 +1,683 @@
 {% extends 'accounts/base.html' %}
 {% block title %}Investment Plans{% endblock %}
-
 {% block content %}
-<div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-gray-900 mb-4">Investment Plans</h1>
-    <p class="text-xl text-gray-600">Maximize your tax savings with smart investments</p>
-</div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- ELSS Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-purple-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">💰</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">ELSS Mutual Funds</h3>
-            <p class="text-gray-600 mb-4">Section 80C - High returns with 3-year lock-in</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Up to ₹1.5L tax deduction</p>
-                <p class="text-sm text-gray-600">✓ 12-15% expected returns</p>
-                <p class="text-sm text-gray-600">✓ Shortest lock-in period</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-purple-600">14%</span>
-                <a href="{% url 'plan_detail' 'elss' %}"
-                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">View Details
-                    →</a>
-            </div>
-        </div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --accent-dark: #1d4ed8;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --amber: #d97706;
+        --amber-dim: #fef3c7;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, .08);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, .10);
+    }
+
+    .ep-root {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+    }
+
+    /* Header */
+    .ep-header {
+        margin-bottom: 28px;
+    }
+
+    .ep-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+    }
+
+    .ep-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 4px;
+        letter-spacing: -.02em;
+    }
+
+    .ep-subtitle {
+        font-size: 13.5px;
+        color: var(--ink-muted);
+    }
+
+    /* Filter tabs */
+    .ep-filters {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+    .ep-filter {
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 12.5px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--ink-muted);
+        cursor: pointer;
+        transition: all .13s;
+        user-select: none;
+    }
+
+    .ep-filter:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-dim);
+    }
+
+    .ep-filter.active {
+        border-color: var(--accent);
+        color: var(--accent-dark);
+        background: var(--accent-dim);
+        font-weight: 600;
+    }
+
+    /* Grid */
+    .ep-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 720px) {
+        .ep-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ep-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Plan card */
+    .ep-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow .15s, transform .15s;
+    }
+
+    .ep-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .ep-card-accent {
+        height: 3px;
+        width: 100%;
+    }
+
+    .ep-card-body {
+        padding: 18px 18px 14px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ep-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .ep-card-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ep-card-badge {
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .ep-card-name {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 3px;
+        letter-spacing: -.01em;
+    }
+
+    .ep-card-section {
+        font-size: 11.5px;
+        color: var(--ink-faint);
+        margin-bottom: 12px;
+    }
+
+    .ep-card-features {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 14px;
+    }
+
+    .ep-card-feat {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        color: var(--ink-muted);
+    }
+
+    .ep-card-feat svg {
+        flex-shrink: 0;
+    }
+
+    .ep-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+    }
+
+    .ep-card-rate-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ink-faint);
+        margin-bottom: 2px;
+    }
+
+    .ep-card-rate {
+        font-family: 'DM Mono', monospace;
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+    .ep-card-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 13px;
+        border-radius: 7px;
+        font-size: 12.5px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: opacity .13s;
+    }
+
+    .ep-card-btn:hover {
+        opacity: .85;
+    }
+
+    /* CTA */
+    .ep-cta {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: 24px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ep-cta::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 55% 90% at 95% 50%, rgba(37, 99, 235, .22) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .ep-cta-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .4);
+        margin-bottom: 5px;
+    }
+
+    .ep-cta-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -.01em;
+        margin-bottom: 3px;
+    }
+
+    .ep-cta-sub {
+        font-size: 13px;
+        color: rgba(255, 255, 255, .45);
+    }
+
+    .ep-cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #fff;
+        color: var(--ink);
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity .13s;
+        white-space: nowrap;
+    }
+
+    .ep-cta-btn:hover {
+        opacity: .9;
+    }
+</style>
+
+<div class="ep-root">
+
+    <!-- Header -->
+    <div class="ep-header">
+        <div class="ep-eyebrow">FY 2024–25 · Tax Saving</div>
+        <h1 class="ep-title">Investment Plans</h1>
+        <p class="ep-subtitle">Maximise your deductions with the right instruments</p>
     </div>
 
-    <!-- PPF Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-blue-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">🏦</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Public Provident Fund</h3>
-            <p class="text-gray-600 mb-4">Section 80C - Government backed, risk-free</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Up to ₹1.5L tax deduction</p>
-                <p class="text-sm text-gray-600">✓ Tax-free returns</p>
-                <p class="text-sm text-gray-600">✓ Sovereign guarantee</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-blue-600">7.1%</span>
-                <a href="{% url 'plan_detail' 'ppf' %}"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">View Details →</a>
-            </div>
-        </div>
+    <!-- Filters -->
+    <div class="ep-filters">
+        <span class="ep-filter active" onclick="filterCards(this, 'all')">All Plans</span>
+        <span class="ep-filter" onclick="filterCards(this, '80c')">Section 80C</span>
+        <span class="ep-filter" onclick="filterCards(this, '80d')">Section 80D</span>
+        <span class="ep-filter" onclick="filterCards(this, 'other')">Other Sections</span>
+        <span class="ep-filter" onclick="filterCards(this, 'low-risk')">Low Risk</span>
+        <span class="ep-filter" onclick="filterCards(this, 'high-return')">High Return</span>
     </div>
 
-    <!-- Health Insurance Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-green-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">🏥</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Health Insurance</h3>
-            <p class="text-gray-600 mb-4">Section 80D - Protect your family</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Up to ₹25,000 deduction</p>
-                <p class="text-sm text-gray-600">✓ ₹50,000 for senior citizens</p>
-                <p class="text-sm text-gray-600">✓ Free health check-ups</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-green-600">Coverage</span>
-                <a href="{% url 'plan_detail' 'health' %}"
-                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">View Details
-                    →</a>
+    <!-- Grid -->
+    <div class="ep-grid" id="planGrid">
+
+        <!-- ELSS -->
+        <div class="ep-card" data-tags="80c high-return">
+            <div class="ep-card-accent" style="background:#7c3aed;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#f3f0ff; color:#7c3aed;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#f3f0ff; color:#7c3aed;">80C</span>
+                </div>
+                <div class="ep-card-name">ELSS Mutual Funds</div>
+                <div class="ep-card-section">Equity Linked Savings Scheme</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Up to ₹1,50,000 deduction
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        12–15% expected returns
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Shortest lock-in: 3 years
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Expected Return</div>
+                        <div class="ep-card-rate" style="color:#7c3aed;">~14%</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'elss' %}" class="ep-card-btn"
+                        style="background:#f3f0ff; color:#7c3aed;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- NPS Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-orange-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">📈</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">National Pension System</h3>
-            <p class="text-gray-600 mb-4">Section 80CCD - Build retirement corpus</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Additional ₹50,000 deduction</p>
-                <p class="text-sm text-gray-600">✓ Professional management</p>
-                <p class="text-sm text-gray-600">✓ Choice of investment options</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-orange-600">10-12%</span>
-                <a href="{% url 'plan_detail' 'nps' %}"
-                    class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition">View Details
-                    →</a>
+        <!-- PPF -->
+        <div class="ep-card" data-tags="80c low-risk">
+            <div class="ep-card-accent" style="background:#2563eb;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#dbeafe; color:#2563eb;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#dbeafe; color:#1d4ed8;">80C</span>
+                </div>
+                <div class="ep-card-name">Public Provident Fund</div>
+                <div class="ep-card-section">Government backed · Risk-free</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Up to ₹1,50,000 deduction
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Tax-free interest returns
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Sovereign guarantee
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Current Rate</div>
+                        <div class="ep-card-rate" style="color:#2563eb;">7.1%</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'ppf' %}" class="ep-card-btn"
+                        style="background:#dbeafe; color:#1d4ed8;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Home Loan Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-indigo-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">🏠</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Home Loan</h3>
-            <p class="text-gray-600 mb-4">Section 24 & 80C - Own your dream home</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Principal up to ₹1.5L under 80C</p>
-                <p class="text-sm text-gray-600">✓ Interest up to ₹2L under 24</p>
-                <p class="text-sm text-gray-600">✓ First-time buyer benefits</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-indigo-600">8.5%</span>
-                <a href="{% url 'plan_detail' 'home' %}"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">View Details
-                    →</a>
+        <!-- Health Insurance -->
+        <div class="ep-card" data-tags="80d low-risk other">
+            <div class="ep-card-accent" style="background:#16a34a;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#dcfce7; color:#16a34a;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#dcfce7; color:#15803d;">80D</span>
+                </div>
+                <div class="ep-card-name">Health Insurance</div>
+                <div class="ep-card-section">Protect self &amp; family</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        ₹25,000 deduction (self)
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        ₹50,000 for senior citizen parents
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Includes preventive check-ups
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Benefit</div>
+                        <div class="ep-card-rate"
+                            style="color:#16a34a; font-size:13px; font-family:'DM Sans',sans-serif;">Coverage</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'health' %}" class="ep-card-btn"
+                        style="background:#dcfce7; color:#15803d;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Education Loan Card -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-t-4 border-pink-500">
-        <div class="p-6">
-            <div class="text-4xl mb-4">🎓</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Education Loan</h3>
-            <p class="text-gray-600 mb-4">Section 80E - Fund higher education</p>
-            <div class="space-y-2 mb-6">
-                <p class="text-sm text-gray-600">✓ Deduction on interest for 8 years</p>
-                <p class="text-sm text-gray-600">✓ No upper limit</p>
-                <p class="text-sm text-gray-600">✓ Courses in India & abroad</p>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-pink-600">9-11%</span>
-                <a href="{% url 'plan_detail' 'education' %}"
-                    class="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition">View Details →</a>
+        <!-- NPS -->
+        <div class="ep-card" data-tags="other high-return">
+            <div class="ep-card-accent" style="background:#d97706;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#fef3c7; color:#d97706;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#fef3c7; color:#b45309;">80CCD</span>
+                </div>
+                <div class="ep-card-name">National Pension System</div>
+                <div class="ep-card-section">Build retirement corpus</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Additional ₹50,000 via 80CCD(1B)
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Professional fund management
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Equity / debt / govt bond mix
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Expected Return</div>
+                        <div class="ep-card-rate" style="color:#d97706;">10–12%</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'nps' %}" class="ep-card-btn"
+                        style="background:#fef3c7; color:#b45309;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Tax Saving Calculator -->
-<div class="mt-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white">
-    <div class="flex flex-col md:flex-row justify-between items-center">
+        <!-- Home Loan -->
+        <div class="ep-card" data-tags="80c other">
+            <div class="ep-card-accent" style="background:#4f46e5;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#ede9fe; color:#4f46e5;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#ede9fe; color:#4338ca;">Sec 24 &amp; 80C</span>
+                </div>
+                <div class="ep-card-name">Home Loan</div>
+                <div class="ep-card-section">Own your dream property</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Principal: up to ₹1,50,000 (80C)
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Interest: up to ₹2,00,000 (Sec 24)
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        First-time buyer benefits
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Interest Rate</div>
+                        <div class="ep-card-rate" style="color:#4f46e5;">8.5%</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'home' %}" class="ep-card-btn"
+                        style="background:#ede9fe; color:#4338ca;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Loan -->
+        <div class="ep-card" data-tags="other">
+            <div class="ep-card-accent" style="background:#db2777;"></div>
+            <div class="ep-card-body">
+                <div class="ep-card-top">
+                    <div class="ep-card-icon" style="background:#fce7f3; color:#db2777;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </div>
+                    <span class="ep-card-badge" style="background:#fce7f3; color:#be185d;">80E</span>
+                </div>
+                <div class="ep-card-name">Education Loan</div>
+                <div class="ep-card-section">Fund higher education</div>
+                <div class="ep-card-features">
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Interest deduction for 8 years
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        No upper limit on deduction
+                    </div>
+                    <div class="ep-card-feat">
+                        <svg width="12" height="12" fill="none" stroke="#16a34a" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        India &amp; overseas courses
+                    </div>
+                </div>
+                <div class="ep-card-footer">
+                    <div>
+                        <div class="ep-card-rate-label">Interest Rate</div>
+                        <div class="ep-card-rate" style="color:#db2777;">9–11%</div>
+                    </div>
+                    <a href="{% url 'plan_detail' 'education' %}" class="ep-card-btn"
+                        style="background:#fce7f3; color:#be185d;">
+                        Details
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="ep-cta">
         <div>
-            <h2 class="text-2xl font-bold mb-2">Want to know how much you can save?</h2>
-            <p class="text-purple-100">Use our tax calculator to estimate your savings</p>
+            <div class="ep-cta-label">Tax Calculator</div>
+            <div class="ep-cta-title">See how much you can save</div>
+            <div class="ep-cta-sub">Run a simulation with your income and deductions</div>
         </div>
-        <a href="{% url 'calculate_tax' %}"
-            class="mt-4 md:mt-0 bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Calculate Now →
+        <a href="{% url 'calculate_tax' %}" class="ep-cta-btn">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Calculate Tax
         </a>
     </div>
+
 </div>
+
+<script>
+    function filterCards(el, tag) {
+        document.querySelectorAll('.ep-filter').forEach(f => f.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('.ep-card').forEach(card => {
+            const tags = card.dataset.tags || '';
+            card.style.display = (tag === 'all' || tags.includes(tag)) ? '' : 'none';
+        });
+    }
+</script>
+
 {% endblock %}

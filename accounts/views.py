@@ -282,3 +282,18 @@ def calculate_tax_view(request):
         'effective_tax_rate': (total_tax / total_income * 100) if total_income > 0 else 0,
     }
     return render(request, 'accounts/calculate_tax.html', context)
+
+
+def plan_detail(request, slug):
+    plans = {
+        'elss':      {'plan_name': 'ELSS Mutual Funds',        'section_label': 'Section 80C', 'tagline': 'Equity Linked Savings Scheme', 'rate_label': 'Expected Return', 'rate': '~14%', 'rate_sub': 'market-linked', 'max_deduction': '₹1,50,000', 'lock_in': '3 years', 'tax_on_returns': 'LTCG above ₹1L', 'regime': 'Old Regime', 'risk_label': 'High', 'risk_color': '#dc2626', 'risk_pct': 85},
+        'ppf':       {'plan_name': 'Public Provident Fund',    'section_label': 'Section 80C', 'tagline': 'Government backed · Risk-free', 'rate_label': 'Current Rate', 'rate': '7.1%', 'rate_sub': 'tax-free interest', 'max_deduction': '₹1,50,000', 'lock_in': '15 years', 'tax_on_returns': 'Tax-free (EEE)', 'regime': 'Old Regime', 'risk_label': 'Low', 'risk_color': '#16a34a', 'risk_pct': 12},
+        'health':    {'plan_name': 'Health Insurance',         'section_label': 'Section 80D', 'tagline': 'Protect self & family', 'rate_label': 'Benefit', 'rate': 'Coverage', 'rate_sub': 'cashless hospitalisation', 'max_deduction': '₹75,000', 'lock_in': 'None', 'tax_on_returns': 'N/A', 'regime': 'Old Regime', 'risk_label': 'Low', 'risk_color': '#16a34a', 'risk_pct': 10},
+        'nps':       {'plan_name': 'National Pension System',  'section_label': '80CCD(1B)', 'tagline': 'Build retirement corpus', 'rate_label': 'Expected Return', 'rate': '10–12%', 'rate_sub': 'market-linked', 'max_deduction': '₹50,000', 'lock_in': 'Till age 60', 'tax_on_returns': 'Annuity taxable', 'regime': 'Old Regime', 'risk_label': 'Medium', 'risk_color': '#d97706', 'risk_pct': 50},
+        'home':      {'plan_name': 'Home Loan',                'section_label': 'Sec 24 & 80C', 'tagline': 'Own your dream property', 'rate_label': 'Interest Rate', 'rate': '8.5%', 'rate_sub': 'current avg rate', 'max_deduction': '₹3,50,000', 'lock_in': 'Loan tenure', 'tax_on_returns': 'N/A', 'regime': 'Old Regime', 'risk_label': 'Low', 'risk_color': '#16a34a', 'risk_pct': 15},
+        'education': {'plan_name': 'Education Loan',           'section_label': 'Section 80E', 'tagline': 'Fund higher education', 'rate_label': 'Interest Rate', 'rate': '9–11%', 'rate_sub': 'varies by lender', 'max_deduction': 'No limit', 'lock_in': '8 years (deduction)', 'tax_on_returns': 'N/A', 'regime': 'Old Regime', 'risk_label': 'Low', 'risk_color': '#16a34a', 'risk_pct': 10},
+    }
+    context = plans.get(slug, {})
+    context['plan_slug'] = slug
+    context['overview'] = "..."   # add per plan
+    return render(request, 'plan_detail.html', context)

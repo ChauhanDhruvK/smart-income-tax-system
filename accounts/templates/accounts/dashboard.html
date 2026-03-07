@@ -1,78 +1,516 @@
 {% extends 'accounts/base.html' %}
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
-<div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white mb-8">
-    <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.first_name|default:user.username }}! 👋</h1>
-    <p class="text-purple-100">Here's your financial summary</p>
-</div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
-        <p class="text-sm text-gray-600 mb-1">Total Income</p>
-        <p class="text-3xl font-bold text-gray-900">₹{{ total_income|floatformat:2 }}</p>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-        <p class="text-sm text-gray-600 mb-1">Total Deductions</p>
-        <p class="text-3xl font-bold text-gray-900">₹{{ total_deductions|floatformat:2 }}</p>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-        <p class="text-sm text-gray-600 mb-1">Net Income</p>
-        <p class="text-3xl font-bold text-gray-900">₹{{ net_income|floatformat:2 }}</p>
-    </div>
-</div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Income</h3>
-        {% for income in incomes %}
-        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-            <div>
-                <p class="font-medium text-gray-900">{{ income.source }}</p>
-                <p class="text-sm text-gray-500">{{ income.date|date:"d M Y" }}</p>
-            </div>
-            <p class="font-semibold text-green-600">+₹{{ income.amount|floatformat:2 }}</p>
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --red: #dc2626;
+        --red-dim: #fee2e2;
+        --amber: #d97706;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, .08);
+    }
+
+    .db-root {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+    }
+
+    /* ── Hero ── */
+    .db-hero {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: 26px 32px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .db-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 55% 90% at 95% 50%, rgba(37, 99, 235, .22) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .db-hero-greeting {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .4);
+        margin-bottom: 5px;
+    }
+
+    .db-hero-name {
+        font-size: 22px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -.02em;
+        margin: 0 0 4px;
+    }
+
+    .db-hero-sub {
+        font-size: 13px;
+        color: rgba(255, 255, 255, .4);
+    }
+
+    .db-hero-date {
+        font-size: 12px;
+        color: rgba(255, 255, 255, .35);
+        font-family: 'DM Mono', monospace;
+        white-space: nowrap;
+    }
+
+    /* ── Stats strip ── */
+    .db-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 560px) {
+        .db-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .db-stat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .db-stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .db-stat-icon.income {
+        background: var(--green-dim);
+        color: var(--green);
+    }
+
+    .db-stat-icon.deduct {
+        background: var(--red-dim);
+        color: var(--red);
+    }
+
+    .db-stat-icon.net {
+        background: var(--accent-dim);
+        color: var(--accent);
+    }
+
+    .db-stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+        margin-bottom: 3px;
+    }
+
+    .db-stat-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: -.01em;
+    }
+
+    /* ── Two-col grid ── */
+    .db-lists {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+        .db-lists {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Panel ── */
+    .db-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .db-panel-header {
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .db-panel-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .db-panel-title-wrap svg {
+        color: var(--ink-muted);
+    }
+
+    .db-panel-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .db-panel-body {
+        padding: 4px 0;
+    }
+
+    /* ── List rows ── */
+    .db-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 18px;
+        border-bottom: 1px solid var(--border);
+        gap: 12px;
+    }
+
+    .db-row:last-child {
+        border-bottom: none;
+    }
+
+    .db-row-source {
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+
+    .db-row-date {
+        font-size: 11.5px;
+        color: var(--ink-faint);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .db-row-amount {
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .db-row-amount.positive {
+        color: var(--green);
+    }
+
+    .db-row-amount.negative {
+        color: var(--red);
+    }
+
+    .db-empty {
+        padding: 24px 18px;
+        font-size: 13px;
+        color: var(--ink-faint);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .db-empty svg {
+        opacity: .4;
+    }
+
+    /* ── Quick actions ── */
+    .db-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    @media (max-width: 560px) {
+        .db-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .db-action {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px 12px;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow .15s, border-color .15s, transform .15s;
+    }
+
+    .db-action:hover {
+        box-shadow: var(--shadow);
+        border-color: #c7cdd8;
+        transform: translateY(-1px);
+    }
+
+    .db-action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .db-action-icon.a1 {
+        background: var(--green-dim);
+        color: var(--green);
+    }
+
+    .db-action-icon.a2 {
+        background: var(--red-dim);
+        color: var(--red);
+    }
+
+    .db-action-icon.a3 {
+        background: var(--accent-dim);
+        color: var(--accent);
+    }
+
+    .db-action-icon.a4 {
+        background: #f3f0ff;
+        color: #7c3aed;
+    }
+
+    .db-action-label {
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--ink-muted);
+        text-align: center;
+        line-height: 1.3;
+    }
+</style>
+
+<div class="db-root">
+
+    <!-- Hero -->
+    <div class="db-hero">
+        <div>
+            <div class="db-hero-greeting">Financial Overview</div>
+            <h1 class="db-hero-name">Welcome back, {{ user.first_name|default:user.username }}</h1>
+            <div class="db-hero-sub">FY 2024–25 · Assessment Year 2025–26</div>
         </div>
-        {% empty %}
-        <p class="text-gray-500">No income added yet</p>
-        {% endfor %}
+        <div class="db-hero-date">{% now "D, d M Y" %}</div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Deductions</h3>
-        {% for deduction in deductions %}
-        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-            <div>
-                <p class="font-medium text-gray-900">{{ deduction.section }}</p>
-                <p class="text-sm text-gray-500">{{ deduction.date|date:"d M Y" }}</p>
+    <!-- Stats -->
+    <div class="db-stats">
+        <div class="db-stat">
+            <div class="db-stat-icon income">
+                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
             </div>
-            <p class="font-semibold text-orange-600">-₹{{ deduction.amount|floatformat:2 }}</p>
+            <div>
+                <div class="db-stat-label">Total Income</div>
+                <div class="db-stat-val">₹ {{ total_income|floatformat:2 }}</div>
+            </div>
         </div>
-        {% empty %}
-        <p class="text-gray-500">No deductions added yet</p>
-        {% endfor %}
+        <div class="db-stat">
+            <div class="db-stat-icon deduct">
+                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                </svg>
+            </div>
+            <div>
+                <div class="db-stat-label">Total Deductions</div>
+                <div class="db-stat-val">₹ {{ total_deductions|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="db-stat">
+            <div class="db-stat-icon net">
+                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+            <div>
+                <div class="db-stat-label">Net Income</div>
+                <div class="db-stat-val">₹ {{ net_income|floatformat:2 }}</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <a href="{% url 'add_income' %}" class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
-        <div class="text-2xl mb-2">💰</div>
-        <span class="text-sm font-medium text-gray-700">Add Income</span>
-    </a>
-    <a href="{% url 'add_deduction' %}"
-        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
-        <div class="text-2xl mb-2">📉</div>
-        <span class="text-sm font-medium text-gray-700">Add Deduction</span>
-    </a>
-    <a href="{% url 'calculate_tax' %}"
-        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
-        <div class="text-2xl mb-2">🧮</div>
-        <span class="text-sm font-medium text-gray-700">Calculate Tax</span>
-    </a>
-    <a href="{% url 'explore_plans' %}"
-        class="bg-white p-4 rounded-xl shadow-sm text-center hover:shadow-md transition">
-        <div class="text-2xl mb-2">📊</div>
-        <span class="text-sm font-medium text-gray-700">Explore Plans</span>
-    </a>
+    <!-- Lists -->
+    <div class="db-lists">
+
+        <!-- Recent Income -->
+        <div class="db-panel">
+            <div class="db-panel-header">
+                <div class="db-panel-title-wrap">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="db-panel-title">Recent Income</span>
+                </div>
+                <a href="{% url 'add_income' %}"
+                    style="font-size:11.5px; font-weight:600; color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:4px;">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add
+                </a>
+            </div>
+            <div class="db-panel-body">
+                {% for income in incomes %}
+                <div class="db-row">
+                    <div>
+                        <div class="db-row-source">{{ income.source }}</div>
+                        <div class="db-row-date">{{ income.date|date:"d M Y" }}</div>
+                    </div>
+                    <span class="db-row-amount positive">+₹{{ income.amount|floatformat:2 }}</span>
+                </div>
+                {% empty %}
+                <div class="db-empty">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    No income entries yet
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Deductions -->
+        <div class="db-panel">
+            <div class="db-panel-header">
+                <div class="db-panel-title-wrap">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                    </svg>
+                    <span class="db-panel-title">Recent Deductions</span>
+                </div>
+                <a href="{% url 'add_deduction' %}"
+                    style="font-size:11.5px; font-weight:600; color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:4px;">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add
+                </a>
+            </div>
+            <div class="db-panel-body">
+                {% for deduction in deductions %}
+                <div class="db-row">
+                    <div>
+                        <div class="db-row-source">{{ deduction.section }}</div>
+                        <div class="db-row-date">{{ deduction.date|date:"d M Y" }}</div>
+                    </div>
+                    <span class="db-row-amount negative">−₹{{ deduction.amount|floatformat:2 }}</span>
+                </div>
+                {% empty %}
+                <div class="db-empty">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    No deduction entries yet
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="db-actions">
+        <a href="{% url 'add_income' %}" class="db-action">
+            <div class="db-action-icon a1">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </div>
+            <span class="db-action-label">Add Income</span>
+        </a>
+        <a href="{% url 'add_deduction' %}" class="db-action">
+            <div class="db-action-icon a2">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                </svg>
+            </div>
+            <span class="db-action-label">Add Deduction</span>
+        </a>
+        <a href="{% url 'calculate_tax' %}" class="db-action">
+            <div class="db-action-icon a3">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <span class="db-action-label">Calculate Tax</span>
+        </a>
+        <a href="{% url 'explore_plans' %}" class="db-action">
+            <div class="db-action-icon a4">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+            <span class="db-action-label">Explore Plans</span>
+        </a>
+    </div>
+
 </div>
 {% endblock %}

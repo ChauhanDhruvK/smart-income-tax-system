@@ -2,111 +2,193 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
 <style>
-    .auth-container {
-        min-height: 70vh;
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --radius: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    }
+
+    .auth-root {
+        font-family: 'DM Sans', sans-serif;
+        min-height: 80vh;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 40px 20px;
     }
 
     .auth-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem;
         width: 100%;
-        max-width: 400px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px 30px;
+        box-shadow: var(--shadow);
     }
 
     .auth-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
+    }
+
+    .auth-badge {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--ink-faint);
+        margin-bottom: 6px;
     }
 
     .auth-header h1 {
-        color: var(--text);
-        margin-bottom: 0.5rem;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 6px;
     }
 
     .auth-header p {
-        color: var(--text-light);
+        font-size: 13px;
+        color: var(--ink-muted);
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 18px;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text);
+        font-size: 13px;
         font-weight: 500;
+        color: var(--ink-muted);
+        margin-bottom: 6px;
     }
 
     .form-group input {
         width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #E5E7EB;
+        padding: 10px 12px;
         border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        transition: all .15s;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-dim);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 6px;
+        transition: background .15s;
+    }
+
+    .auth-btn:hover {
+        background: #1e4fd6;
     }
 
     .auth-footer {
         text-align: center;
-        margin-top: 1.5rem;
-        color: var(--text-light);
+        font-size: 13px;
+        margin-top: 20px;
+        color: var(--ink-muted);
     }
 
     .auth-footer a {
-        color: var(--primary);
-        text-decoration: none;
+        color: var(--accent);
         font-weight: 600;
+        text-decoration: none;
     }
 
-    .demo-box {
-        margin-top: 2rem;
-        padding: 1rem;
-        background: #F3F4F6;
+    .auth-info {
+        margin-top: 18px;
+        padding: 12px;
+        background: var(--surface-2);
         border-radius: 8px;
-        font-size: 0.9rem;
+        font-size: 12px;
+        color: var(--ink-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
 </style>
 
-<div class="auth-container">
+<div class="auth-root">
+
+    ```
     <div class="auth-card">
+
         <div class="auth-header">
-            <h1>Welcome Back! 👋</h1>
-            <p>Login to your account</p>
+            <div class="auth-badge">Smart Income Tax System</div>
+            <h1>Welcome Back</h1>
+            <p>Login to access your financial dashboard</p>
         </div>
 
         <form method="POST">
             {% csrf_token %}
+
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" name="username" placeholder="Enter username" required>
+                <input type="text" name="username" placeholder="Enter your username" required>
             </div>
+
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" placeholder="Enter password" required>
+                <input type="password" name="password" placeholder="Enter your password" required>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+
+            <button type="submit" class="auth-btn">
+                Login
+            </button>
+
         </form>
 
         <div class="auth-footer">
-            Don't have an account? <a href="{% url 'register' %}">Register</a>
+            Don't have an account?
+            <a href="{% url 'register' %}">Create one</a>
         </div>
 
-        <div class="demo-box">
-            <strong>Demo:</strong> demo / demo12345
+        <div class="auth-info">
+            Manage your income, deductions, and tax planning securely in one place.
         </div>
+
     </div>
+    ```
+
 </div>
+
 {% endblock %}

@@ -1,116 +1,750 @@
 {% extends 'accounts/base.html' %}
 {% block title %}Add Income{% endblock %}
-
 {% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
 <style>
-    .form-container {
-        max-width: 600px;
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --accent-dark: #1d4ed8;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --amber: #d97706;
+        --amber-dim: #fef3c7;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, .08);
+    }
+
+    .ai-root {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 780px;
         margin: 0 auto;
-        background: white;
-        padding: 2rem;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 32px 20px 64px;
     }
 
-    .form-header {
-        text-align: center;
-        margin-bottom: 2rem;
+    /* ── Header ── */
+    .ai-header {
+        margin-bottom: 24px;
     }
 
-    .form-group {
-        margin-bottom: 1.5rem;
+    .ai-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
     }
 
-    .form-group label {
+    .ai-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 4px;
+        letter-spacing: -.02em;
+    }
+
+    .ai-subtitle {
+        font-size: 13.5px;
+        color: var(--ink-muted);
+    }
+
+    /* ── Layout ── */
+    .ai-layout {
+        display: grid;
+        grid-template-columns: 1fr 244px;
+        gap: 16px;
+        align-items: start;
+    }
+
+    @media (max-width: 680px) {
+        .ai-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Card ── */
+    .ai-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ai-card-body {
+        padding: 24px;
+    }
+
+    /* ── Form ── */
+    .ai-field {
+        margin-bottom: 18px;
+    }
+
+    .ai-label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text);
-        font-weight: 500;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+        margin-bottom: 7px;
     }
 
-    .form-group input,
-    .form-group textarea {
+    .ai-select,
+    .ai-input,
+    .ai-textarea {
         width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #E5E7EB;
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        color: var(--ink);
+        background: var(--surface);
         outline: none;
-        border-color: var(--primary);
+        transition: border-color .15s, box-shadow .15s;
+        appearance: none;
+        -webkit-appearance: none;
     }
 
-    .form-row {
+    .ai-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa1b1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+
+    .ai-select:focus,
+    .ai-input:focus,
+    .ai-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+    }
+
+    .ai-textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .ai-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        gap: 14px;
     }
 
-    .suggestions {
+    @media (max-width: 480px) {
+        .ai-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ai-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 20px 0;
+    }
+
+    /* ── Amount input with prefix ── */
+    .ai-amount-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .ai-amount-prefix {
+        position: absolute;
+        left: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink-muted);
+        font-family: 'DM Mono', monospace;
+        pointer-events: none;
+    }
+
+    .ai-amount-wrap .ai-input {
+        padding-left: 26px;
+    }
+
+    /* ── Source type pills ── */
+    .ai-source-pills {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
+        gap: 7px;
+        margin-bottom: 10px;
     }
 
-    .chip {
-        padding: 0.5rem 1rem;
-        background: #F3F4F6;
-        border-radius: 20px;
-        font-size: 0.9rem;
+    .ai-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 11px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ink-muted);
+        background: var(--surface-2);
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all .13s;
+        user-select: none;
     }
 
-    .chip:hover {
-        background: var(--primary);
-        color: white;
+    .ai-pill:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-dim);
+    }
+
+    .ai-pill.active {
+        border-color: var(--accent);
+        color: var(--accent-dark);
+        background: var(--accent-dim);
+        font-weight: 600;
+    }
+
+    .ai-pill svg {
+        opacity: .7;
+    }
+
+    /* ── Desc box ── */
+    .ai-desc-box {
+        display: none;
+        background: var(--green-dim);
+        border: 1px solid #bbf7d0;
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
+
+    .ai-desc-box.visible {
+        display: block;
+    }
+
+    .ai-desc-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #15803d;
+        margin-bottom: 3px;
+    }
+
+    .ai-desc-text {
+        font-size: 12.5px;
+        color: #166534;
+        line-height: 1.5;
+    }
+
+    /* ── Buttons ── */
+    .ai-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .ai-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 18px;
+        border-radius: 9px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all .15s;
+    }
+
+    .ai-btn-primary {
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .ai-btn-primary:hover {
+        background: #1a2030;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+    }
+
+    .ai-btn-secondary {
+        background: var(--surface-2);
+        color: var(--ink-muted);
+        border: 1px solid var(--border);
+    }
+
+    .ai-btn-secondary:hover {
+        background: var(--surface-3);
+        color: var(--ink);
+    }
+
+    /* ── Sidebar ── */
+    .ai-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ai-info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ai-info-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .ai-info-header svg {
+        color: var(--ink-muted);
+        flex-shrink: 0;
+    }
+
+    .ai-info-header-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ink-faint);
+    }
+
+    .ai-info-body {
+        padding: 14px 16px;
+    }
+
+    .ai-source-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+    }
+
+    .ai-source-row:last-child {
+        border-bottom: none;
+    }
+
+    .ai-source-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .ai-source-icon.salary {
+        background: var(--green-dim);
+        color: var(--green);
+    }
+
+    .ai-source-icon.business {
+        background: var(--accent-dim);
+        color: var(--accent);
+    }
+
+    .ai-source-icon.capital {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .ai-source-icon.other {
+        background: var(--surface-3);
+        color: var(--ink-muted);
+    }
+
+    .ai-source-name {
+        font-weight: 600;
+        color: var(--ink);
+        font-size: 12.5px;
+    }
+
+    .ai-source-desc {
+        font-size: 11.5px;
+        color: var(--ink-faint);
+        margin-top: 1px;
+        line-height: 1.4;
+    }
+
+    .ai-tips {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ai-tip {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        line-height: 1.45;
+    }
+
+    .ai-tip:last-child {
+        border-bottom: none;
+    }
+
+    .ai-tip-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--ink-faint);
+        margin-top: 1px;
     }
 </style>
 
-<div class="form-container">
-    <div class="form-header">
-        <h1>Add Income</h1>
-        <p style="color: var(--text-light);">Record your income details</p>
+<div class="ai-root">
+
+    <!-- Header -->
+    <div class="ai-header">
+        <div class="ai-eyebrow">Income Tax · FY 2024–25</div>
+        <h1 class="ai-title">Add Income</h1>
+        <p class="ai-subtitle">Record an income entry to compute your tax liability accurately</p>
     </div>
 
-    <div class="suggestions">
-        <span class="chip" onclick="document.getElementById('source').value='Salary'">Salary</span>
-        <span class="chip" onclick="document.getElementById('source').value='Freelance'">Freelance</span>
-        <span class="chip" onclick="document.getElementById('source').value='Business'">Business</span>
-        <span class="chip" onclick="document.getElementById('source').value='Rental'">Rental</span>
+    <!-- Layout -->
+    <div class="ai-layout">
+
+        <!-- Form -->
+        <div class="ai-card">
+            <div class="ai-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Source type pills -->
+                    <div class="ai-field">
+                        <label class="ai-label">Income Category</label>
+                        <div class="ai-source-pills" id="sourcePills">
+                            <span class="ai-pill" data-value="Salary" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Salary
+                            </span>
+                            <span class="ai-pill" data-value="Business Income" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Business
+                            </span>
+                            <span class="ai-pill" data-value="Capital Gains" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                Capital Gains
+                            </span>
+                            <span class="ai-pill" data-value="Rental Income" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                Rental
+                            </span>
+                            <span class="ai-pill" data-value="Interest Income" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Interest
+                            </span>
+                            <span class="ai-pill" data-value="Freelance" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Freelance
+                            </span>
+                            <span class="ai-pill" data-value="Other" onclick="selectPill(this)">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                </svg>
+                                Other
+                            </span>
+                        </div>
+
+                        <!-- Hidden + visible source input -->
+                        <input type="hidden" name="source" id="sourceHidden">
+                        <input type="text" id="sourceText" class="ai-input" placeholder="Or type a custom source…"
+                            oninput="document.getElementById('sourceHidden').value = this.value; clearPills();">
+
+                        <!-- Description box -->
+                        <div class="ai-desc-box" id="descBox">
+                            <div class="ai-desc-title" id="descTitle"></div>
+                            <div class="ai-desc-text" id="descText"></div>
+                        </div>
+                    </div>
+
+                    <div class="ai-divider"></div>
+
+                    <!-- Amount + Date -->
+                    <div class="ai-row">
+                        <div class="ai-field">
+                            <label class="ai-label" for="amount">Amount (₹)</label>
+                            <div class="ai-amount-wrap">
+                                <span class="ai-amount-prefix">₹</span>
+                                <input type="number" id="amount" name="amount" step="0.01" min="0" placeholder="0.00"
+                                    class="ai-input" required>
+                            </div>
+                        </div>
+                        <div class="ai-field">
+                            <label class="ai-label" for="date">Date</label>
+                            <input type="date" id="date" name="date" value="{% now 'Y-m-d' %}" class="ai-input"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="ai-field">
+                        <label class="ai-label" for="description">
+                            Notes <span
+                                style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-faint)">(optional)</span>
+                        </label>
+                        <textarea id="description" name="description" class="ai-textarea"
+                            placeholder="e.g. April salary from Employer, FD interest from SBI…"></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="ai-actions">
+                        <button type="submit" class="ai-btn ai-btn-primary">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Income
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="ai-btn ai-btn-secondary">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="ai-sidebar">
+
+            <!-- Income sources -->
+            <div class="ai-info-card">
+                <div class="ai-info-header">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span class="ai-info-header-title">Income Heads</span>
+                </div>
+                <div class="ai-info-body">
+                    <div class="ai-source-row">
+                        <div class="ai-source-icon salary">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="ai-source-name">Salary &amp; Wages</div>
+                            <div class="ai-source-desc">Employment income including HRA, allowances</div>
+                        </div>
+                    </div>
+                    <div class="ai-source-row">
+                        <div class="ai-source-icon business">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="ai-source-name">Business / Profession</div>
+                            <div class="ai-source-desc">Self-employment, freelance, consultancy</div>
+                        </div>
+                    </div>
+                    <div class="ai-source-row">
+                        <div class="ai-source-icon capital">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="ai-source-name">Capital Gains</div>
+                            <div class="ai-source-desc">Profit from sale of property, stocks, MF</div>
+                        </div>
+                    </div>
+                    <div class="ai-source-row">
+                        <div class="ai-source-icon other">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="ai-source-name">Other Sources</div>
+                            <div class="ai-source-desc">Interest, rental, dividends, gifts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="ai-info-card">
+                <div class="ai-info-header">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span class="ai-info-header-title">Quick Tips</span>
+                </div>
+                <div class="ai-info-body">
+                    <div class="ai-tips">
+                        <div class="ai-tip">
+                            <div class="ai-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Enter gross salary before any TDS deductions
+                        </div>
+                        <div class="ai-tip">
+                            <div class="ai-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Add each income source as a separate entry
+                        </div>
+                        <div class="ai-tip">
+                            <div class="ai-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Rental income is taxed after 30% standard deduction
+                        </div>
+                        <div class="ai-tip">
+                            <div class="ai-tip-icon">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4" />
+                                </svg>
+                            </div>
+                            Capital gains tax rate depends on holding period
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <label>Source</label>
-            <input type="text" id="source" name="source" placeholder="e.g., Salary" required>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Amount (₹)</label>
-                <input type="number" name="amount" step="0.01" placeholder="0.00" required>
-            </div>
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" name="date" value="{% now 'Y-m-d' %}" required>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Description (Optional)</label>
-            <textarea name="description" rows="3" placeholder="Add notes..."></textarea>
-        </div>
-
-        <div style="display: flex; gap: 1rem;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Income</button>
-            <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
-        </div>
-    </form>
 </div>
+
+<script>
+    const sourceInfo = {
+        'Salary': {
+            title: 'Salary & Wages',
+            text: 'Include your total CTC or gross salary. Standard deduction of ₹50,000 will be applied automatically. Add allowances like HRA separately if applicable.'
+        },
+        'Business Income': {
+            title: 'Business / Professional Income',
+            text: 'Net profit from your business or profession after allowable business expenses. Freelancers and consultants fall under this head.'
+        },
+        'Capital Gains': {
+            title: 'Capital Gains',
+            text: 'Profit from sale of assets — shares, mutual funds, property, or gold. Tax rate varies: STCG at 15–20%, LTCG at 10–20% depending on asset type.'
+        },
+        'Rental Income': {
+            title: 'Rental Income',
+            text: 'Annual rent received from property. A standard deduction of 30% is allowed for repairs and maintenance before taxation.'
+        },
+        'Interest Income': {
+            title: 'Interest Income',
+            text: 'Interest from savings accounts, fixed deposits, bonds, or any lending. Fully taxable at your applicable slab rate.'
+        },
+        'Freelance': {
+            title: 'Freelance / Consultancy',
+            text: 'Income from freelance projects or consulting engagements. Taxable under Business/Profession head. You may claim business expenses against this income.'
+        },
+        'Other': {
+            title: 'Other Sources',
+            text: 'Includes dividends, winnings from lottery or games, gifts exceeding ₹50,000, and any income not covered under other heads.'
+        }
+    };
+
+    function selectPill(el) {
+        document.querySelectorAll('.ai-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        const val = el.dataset.value;
+        document.getElementById('sourceHidden').value = val;
+        document.getElementById('sourceText').value = '';
+        showDesc(val);
+    }
+
+    function clearPills() {
+        document.querySelectorAll('.ai-pill').forEach(p => p.classList.remove('active'));
+        document.getElementById('descBox').classList.remove('visible');
+    }
+
+    function showDesc(val) {
+        const box = document.getElementById('descBox');
+        if (sourceInfo[val]) {
+            document.getElementById('descTitle').textContent = sourceInfo[val].title;
+            document.getElementById('descText').textContent = sourceInfo[val].text;
+            box.classList.add('visible');
+        } else {
+            box.classList.remove('visible');
+        }
+    }
+</script>
+
 {% endblock %}

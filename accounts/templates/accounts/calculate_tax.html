@@ -2,236 +2,916 @@
 {% block title %}Tax Calculator{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+{% load humanize %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --ink: #0f1117;
+        --ink-muted: #5a6070;
+        --ink-faint: #9aa1b1;
+        --surface: #ffffff;
+        --surface-2: #f4f5f7;
+        --surface-3: #eceef2;
+        --border: #e2e5ec;
+        --accent: #2563eb;
+        --accent-dim: #dbeafe;
+        --accent-dark: #1d4ed8;
+        --green: #16a34a;
+        --green-dim: #dcfce7;
+        --amber: #d97706;
+        --amber-dim: #fef3c7;
+        --radius: 10px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .05);
+        --shadow-lg: 0 12px 32px rgba(0, 0, 0, .10), 0 2px 6px rgba(0, 0, 0, .06);
+    }
+
+    .tc-root {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+    }
+
+    /* ── Header ── */
+    .tc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .tc-header-left {}
+
+    .tc-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+    }
+
+    .tc-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+        letter-spacing: -.02em;
+    }
+
+    /* ── Regime Toggle ── */
+    .tc-toggle {
+        display: flex;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .tc-toggle a {
+        padding: 7px 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--ink-muted);
+        transition: all .15s;
+    }
+
+    .tc-toggle a.active {
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Hero Card ── */
+    .tc-hero {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tc-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(37, 99, 235, .25) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .tc-hero-label {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .45);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tc-hero-label svg {
+        opacity: .6;
+    }
+
+    .tc-hero-amount {
+        font-family: 'DM Mono', monospace;
+        font-size: 40px;
+        font-weight: 500;
+        color: #ffffff;
+        letter-spacing: -.02em;
+        line-height: 1;
+    }
+
+    .tc-hero-sub {
+        font-size: 12px;
+        color: rgba(255, 255, 255, .4);
+        margin-top: 8px;
+    }
+
+    .tc-hero-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .tc-badge-rate {
+        background: rgba(255, 255, 255, .1);
+        color: rgba(255, 255, 255, .8);
+    }
+
+    .tc-badge-rebate {
+        background: rgba(22, 163, 74, .2);
+        color: #4ade80;
+    }
+
+    /* ── Stat Strip ── */
+    .tc-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .tc-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .tc-stat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tc-stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--ink-muted);
+    }
+
+    .tc-stat-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 3px;
+    }
+
+    .tc-stat-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: -.01em;
+    }
+
+    /* ── Main Grid ── */
+    .tc-body {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 16px;
+        align-items: start;
+    }
+
+    @media (max-width: 720px) {
+        .tc-body {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Panels ── */
+    .tc-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tc-panel-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface-2);
+    }
+
+    .tc-panel-header svg {
+        color: var(--ink-muted);
+    }
+
+    .tc-panel-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -.01em;
+    }
+
+    .tc-panel-body {
+        padding: 20px;
+    }
+
+    /* ── Table rows ── */
+    .tc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13.5px;
+    }
+
+    .tc-row:last-child {
+        border-bottom: none;
+    }
+
+    .tc-row-label {
+        color: var(--ink-muted);
+    }
+
+    .tc-row-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .tc-row-val.deduct {
+        color: var(--green);
+    }
+
+    .tc-row-val.total {
+        color: var(--accent);
+        font-size: 14px;
+    }
+
+    .tc-row.sum {
+        border-top: 2px solid var(--border);
+        margin-top: 4px;
+        padding-top: 12px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .tc-row.sum .tc-row-label {
+        color: var(--ink);
+    }
+
+    .tc-note {
+        font-size: 11px;
+        color: var(--amber);
+        margin-top: 4px;
+        padding: 6px 10px;
+        background: var(--amber-dim);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Monthly box ── */
+    .tc-monthly {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .tc-m-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+    }
+
+    .tc-m-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    /* ── Sidebar slab panel ── */
+    .tc-slabs {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .tc-slab {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 7px;
+        font-size: 12.5px;
+        color: var(--ink-muted);
+        transition: background .12s;
+    }
+
+    .tc-slab.active {
+        background: var(--accent-dim);
+        color: var(--accent-dark);
+        font-weight: 600;
+    }
+
+    .tc-slab-rate {
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .tc-slab-rate.nil {
+        color: var(--green);
+    }
+
+    .tc-info-box {
+        margin-top: 14px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        font-size: 12px;
+        color: var(--ink-muted);
+    }
+
+    .tc-info-box strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ink-faint);
+        margin-bottom: 6px;
+    }
+
+    .tc-info-box li {
+        margin-bottom: 3px;
+        padding-left: 10px;
+        position: relative;
+    }
+
+    .tc-info-box li::before {
+        content: '–';
+        position: absolute;
+        left: 0;
+        color: var(--ink-faint);
+    }
+
+    /* ── Comparison strip ── */
+    .tc-compare {
+        margin-top: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tc-compare-header {
+        background: var(--surface-2);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tc-compare-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .tc-compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 500px) {
+        .tc-compare-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .tc-compare-col {
+        padding: 18px 20px;
+        font-size: 13px;
+        border-right: 1px solid var(--border);
+    }
+
+    .tc-compare-col:last-child {
+        border-right: none;
+    }
+
+    .tc-compare-col-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ink-faint);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tc-compare-col li {
+        color: var(--ink-muted);
+        margin-bottom: 5px;
+        padding-left: 12px;
+        position: relative;
+        font-size: 12.5px;
+    }
+
+    .tc-compare-col li::before {
+        content: '·';
+        position: absolute;
+        left: 2px;
+    }
+
+    .tc-compare-col .best {
+        margin-top: 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-dim);
+        padding: 5px 9px;
+        border-radius: 5px;
+        display: inline-block;
+    }
+
+    /* ── Actions ── */
+    .tc-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .tc-btn {
+        flex: 1;
+        min-width: 160px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 20px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all .15s;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .tc-btn-secondary {
+        background: var(--surface-2);
+        color: var(--ink-muted);
+        border: 1px solid var(--border);
+    }
+
+    .tc-btn-secondary:hover {
+        background: var(--surface-3);
+        color: var(--ink);
+    }
+
+    .tc-btn-primary {
+        background: var(--ink);
+        color: #fff;
+        border: 1px solid transparent;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .tc-btn-primary:hover {
+        background: #1a2030;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+    }
+
+    /* ── Divider ── */
+    .tc-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 4px 0;
+    }
+</style>
+
+<div class="tc-root">
+
     <!-- Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            Tax Calculator
-        </h1>
-        <p class="text-gray-600 text-lg">Calculate your tax liability under different regimes</p>
+    <div class="tc-header">
+        <div class="tc-header-left">
+            <div class="tc-eyebrow">FY 2024–25 · AY 2025–26</div>
+            <h1 class="tc-title">Income Tax Calculator</h1>
+        </div>
+        <div class="tc-toggle">
+            <a href="?regime=new" class="{% if regime == 'new' %}active{% endif %}">New Regime</a>
+            <a href="?regime=old" class="{% if regime == 'old' %}active{% endif %}">Old Regime</a>
+        </div>
     </div>
 
-    <!-- Main Calculator Card -->
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-        <!-- Regime Toggle -->
-        <div class="bg-gray-50 p-6 border-b">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">Select Tax Regime</h2>
-                <div class="flex bg-white rounded-lg p-1 shadow-sm">
-                    <a href="?regime=new"
-                        class="px-8 py-3 rounded-lg font-semibold transition-all duration-200 {% if regime == 'new' %}bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md{% else %}text-gray-600 hover:text-purple-600{% endif %}">
-                        New Regime
-                    </a>
-                    <a href="?regime=old"
-                        class="px-8 py-3 rounded-lg font-semibold transition-all duration-200 {% if regime == 'old' %}bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md{% else %}text-gray-600 hover:text-purple-600{% endif %}">
-                        Old Regime
-                    </a>
-                </div>
+    <!-- Hero -->
+    <div class="tc-hero">
+        <div>
+            <div class="tc-hero-label">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Total Tax Liability
+            </div>
+            <div class="tc-hero-amount">₹ {{ total_tax|floatformat:2|intcomma }}</div>
+            <div class="tc-hero-sub">For the financial year 2025-26</div>
+        </div>
+        <div class="tc-hero-badges">
+            <span class="tc-badge tc-badge-rate">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Effective Rate: {{ effective_tax_rate|floatformat:2 }}%
+            </span>
+            {% if regime == 'new' %}
+            {% if taxable_income <= 700000 %} <span class="tc-badge tc-badge-rebate">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Sec 87A Rebate Applied
+                </span>
+                {% endif %}
+                {% else %}
+                {% if taxable_income <= 500000 %} <span class="tc-badge tc-badge-rebate">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Sec 87A Rebate Applied
+                    </span>
+                    {% endif %}
+                    {% endif %}
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="tc-stats">
+        <div class="tc-stat">
+            <div class="tc-stat-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <div class="tc-stat-label">Gross Income</div>
+                <div class="tc-stat-val">₹ {{ total_income|floatformat:2|intcomma }}</div>
             </div>
         </div>
+        <div class="tc-stat">
+            <div class="tc-stat-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <div class="tc-stat-label">Deductions</div>
+                <div class="tc-stat-val">₹ {{ total_deductions|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+        <div class="tc-stat">
+            <div class="tc-stat-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                </svg>
+            </div>
+            <div>
+                <div class="tc-stat-label">Taxable Income</div>
+                <div class="tc-stat-val">₹ {{ taxable_income|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Results Section -->
-        <div class="p-8">
-            <!-- Main Tax Amount Card -->
-            <div
-                class="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20"></div>
-                <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-16 -mb-16"></div>
+    <!-- Body -->
+    <div class="tc-body">
 
-                <div class="relative">
-                    <p class="text-purple-100 mb-2 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+        <!-- Left: Breakdown -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+
+            <!-- Income breakdown -->
+            <div class="tc-panel">
+                <div class="tc-panel-header">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span class="tc-panel-title">Income &amp; Deductions</span>
+                </div>
+                <div class="tc-panel-body">
+                    <div class="tc-row">
+                        <span class="tc-row-label">Gross Total Income</span>
+                        <span class="tc-row-val">₹ {{ total_income|floatformat:2|intcomma }}</span>
+                    </div>
+                    {% if regime == 'old' %}
+                    <div class="tc-row">
+                        <span class="tc-row-label">Less: Chapter VI-A (80C, 80D, etc.)</span>
+                        <span class="tc-row-val deduct">− ₹ {{ total_deductions|floatformat:2|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="tc-row">
+                        <span class="tc-row-label">Less: Standard Deduction</span>
+                        <span class="tc-row-val deduct">− ₹ 50,000</span>
+                    </div>
+                    <div class="tc-row sum">
+                        <span class="tc-row-label">Net Taxable Income</span>
+                        <span class="tc-row-val total">₹ {{ taxable_income|floatformat:2|intcomma }}</span>
+                    </div>
+                    {% if regime == 'old' and total_deductions > 150000 %}
+                    <div class="tc-note">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        Your Total Tax Liability
-                    </p>
-                    <div class="flex items-baseline justify-between">
-                        <span class="text-5xl md:text-6xl font-bold">₹{{ total_tax|floatformat:2 }}</span>
-                        <span class="text-purple-200 text-lg">per year</span>
-                    </div>
-
-                    <!-- Tax Rate Badge -->
-                    <div class="mt-4 flex flex-wrap gap-3">
-                        <span class="bg-white bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                            Effective Rate: {{ effective_tax_rate|floatformat:1 }}%
-                        </span>
-                        {% if regime == 'new' %}
-                        <span class="bg-green-400 bg-opacity-30 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                            Standard Deduction: ₹50,000
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-gray-600">Total Income</span>
-                        <span class="text-2xl">💰</span>
-                    </div>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ total_income|floatformat:2 }}</p>
-                </div>
-
-                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-gray-600">Total Deductions</span>
-                        <span class="text-2xl">📉</span>
-                    </div>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ total_deductions|floatformat:2 }}</p>
-                </div>
-
-                <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-lg transition">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-gray-600">Taxable Income</span>
-                        <span class="text-2xl">⚖️</span>
-                    </div>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ taxable_income|floatformat:2 }}</p>
-                </div>
-            </div>
-
-            <!-- Tax Breakdown -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Detailed Breakdown -->
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
-                            <span class="text-purple-600">📊</span>
-                        </span>
-                        Tax Breakdown
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
-                            <span class="text-gray-600">Base Tax</span>
-                            <span class="font-semibold text-gray-900">₹{{ tax|floatformat:2 }}</span>
-                        </div>
-                        {% if surcharge and surcharge > 0 %}
-                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
-                            <span class="text-gray-600">Surcharge</span>
-                            <span class="font-semibold text-gray-900">₹{{ surcharge|floatformat:2 }}</span>
-                        </div>
-                        {% endif %}
-                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
-                            <span class="text-gray-600">Health & Education Cess (4%)</span>
-                            <span class="font-semibold text-gray-900">₹{{ cess|floatformat:2 }}</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2">
-                            <span class="text-lg font-bold text-gray-800">Total Payable</span>
-                            <span class="text-2xl font-bold text-purple-600">₹{{ total_tax|floatformat:2 }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tax Slabs Info -->
-                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
-                            <span class="text-blue-600">📋</span>
-                        </span>
-                        {% if regime == 'new' %}New Regime Slabs{% else %}Old Regime Slabs{% endif %}
-                    </h3>
-
-                    {% if regime == 'new' %}
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm"><span>Up to ₹3,00,000</span><span
-                                class="font-medium text-green-600">Nil</span></div>
-                        <div class="flex justify-between text-sm"><span>₹3,00,001 - ₹6,00,000</span><span
-                                class="font-medium">5%</span></div>
-                        <div class="flex justify-between text-sm"><span>₹6,00,001 - ₹9,00,000</span><span
-                                class="font-medium">10%</span></div>
-                        <div class="flex justify-between text-sm"><span>₹9,00,001 - ₹12,00,000</span><span
-                                class="font-medium">15%</span></div>
-                        <div class="flex justify-between text-sm"><span>₹12,00,001 - ₹15,00,000</span><span
-                                class="font-medium">20%</span></div>
-                        <div class="flex justify-between text-sm"><span>Above ₹15,00,000</span><span
-                                class="font-medium">30%</span></div>
-                    </div>
-                    <div class="mt-4 p-3 bg-white rounded-lg text-sm text-gray-600">
-                        <span class="font-medium text-green-600">Note:</span> Rebate under 87A - No tax if income ≤
-                        ₹7,00,000
-                    </div>
-                    {% else %}
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm"><span>Up to ₹2,50,000</span><span
-                                class="font-medium text-green-600">Nil</span></div>
-                        <div class="flex justify-between text-sm"><span>₹2,50,001 - ₹5,00,000</span><span
-                                class="font-medium">5%</span></div>
-                        <div class="flex justify-between text-sm"><span>₹5,00,001 - ₹10,00,000</span><span
-                                class="font-medium">20%</span></div>
-                        <div class="flex justify-between text-sm"><span>Above ₹10,00,000</span><span
-                                class="font-medium">30%</span></div>
-                    </div>
-                    <div class="mt-4 p-3 bg-white rounded-lg text-sm text-gray-600">
-                        <span class="font-medium text-green-600">Note:</span> Rebate under 87A - Max ₹12,500 if income ≤
-                        ₹5,00,000
+                        Sec 80C deduction is capped at ₹1,50,000
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Regime Comparison -->
-            <div class="mt-8 bg-purple-50 rounded-xl p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                    <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
-                        <span class="text-purple-600">⚖️</span>
-                    </span>
-                    Quick Comparison
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-4 rounded-lg">
-                        <h4 class="font-semibold text-purple-600 mb-2">✓ New Regime Benefits</h4>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            <li>• Lower tax rates</li>
-                            <li>• No need to track investments</li>
-                            <li>• Standard deduction of ₹50,000</li>
-                            <li>• Simple compliance</li>
-                        </ul>
+            <!-- Tax calculation -->
+            <div class="tc-panel">
+                <div class="tc-panel-header">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span class="tc-panel-title">Tax Computation</span>
+                </div>
+                <div class="tc-panel-body">
+                    <div class="tc-row">
+                        <span class="tc-row-label">Income Tax (as per slabs)</span>
+                        <span class="tc-row-val">₹ {{ tax|floatformat:2|intcomma }}</span>
                     </div>
-                    <div class="bg-white p-4 rounded-lg">
-                        <h4 class="font-semibold text-blue-600 mb-2">✓ Old Regime Benefits</h4>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            <li>• Multiple deduction options (80C, 80D, etc.)</li>
-                            <li>• HRA & LTA exemptions</li>
-                            <li>• Better for high spenders/investors</li>
-                            <li>• Home loan benefits</li>
-                        </ul>
+                    {% if surcharge and surcharge > 0 %}
+                    <div class="tc-row">
+                        <span class="tc-row-label">Surcharge</span>
+                        <span class="tc-row-val">+ ₹ {{ surcharge|floatformat:2|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="tc-row">
+                        <span class="tc-row-label">Health &amp; Education Cess (4%)</span>
+                        <span class="tc-row-val">+ ₹ {{ cess|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="tc-row sum">
+                        <span class="tc-row-label">Total Tax Payable</span>
+                        <span class="tc-row-val total">₹ {{ total_tax|floatformat:2|intcomma }}</span>
+                    </div>
+
+                    <div class="tc-monthly">
+                        <div>
+                            <div class="tc-m-label">Per Month</div>
+                            <div class="tc-m-val">₹ {% widthratio total_tax 12 1 as monthly %}{{
+                                monthly|floatformat:0|intcomma }}</div>
+                        </div>
+                        <div>
+                            <div class="tc-m-label">Per Day</div>
+                            <div class="tc-m-val">₹ {% widthratio total_tax 365 1 as daily %}{{
+                                daily|floatformat:0|intcomma }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                <a href="{% url 'dashboard' %}"
-                    class="flex-1 bg-gray-100 text-gray-700 text-center px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
-                    ← Back to Dashboard
-                </a>
-                <a href="{% url 'explore_plans' %}"
-                    class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-lg hover:shadow-xl">
-                    Explore Tax Saving Plans →
-                </a>
+        </div>
+
+        <!-- Right: Slabs sidebar -->
+        <div class="tc-panel" style="position: sticky; top: 16px;">
+            <div class="tc-panel-header">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span class="tc-panel-title">{% if regime == 'new' %}New{% else %}Old{% endif %} Regime Slabs</span>
+            </div>
+            <div class="tc-panel-body">
+                <div class="tc-slabs">
+                    {% if regime == 'new' %}
+                    <div class="tc-slab {% if taxable_income <= 300000 %}active{% endif %}">
+                        <span>Up to ₹3,00,000</span>
+                        <span class="tc-slab-rate nil">Nil</span>
+                    </div>
+                    <div class="tc-slab {% if taxable_income > 300000 and taxable_income <= 600000 %}active{% endif %}">
+                        <span>₹3,00,001 – ₹6,00,000</span>
+                        <span class="tc-slab-rate">5%</span>
+                    </div>
+                    <div class="tc-slab {% if taxable_income > 600000 and taxable_income <= 900000 %}active{% endif %}">
+                        <span>₹6,00,001 – ₹9,00,000</span>
+                        <span class="tc-slab-rate">10%</span>
+                    </div>
+                    <div
+                        class="tc-slab {% if taxable_income > 900000 and taxable_income <= 1200000 %}active{% endif %}">
+                        <span>₹9,00,001 – ₹12,00,000</span>
+                        <span class="tc-slab-rate">15%</span>
+                    </div>
+                    <div
+                        class="tc-slab {% if taxable_income > 1200000 and taxable_income <= 1500000 %}active{% endif %}">
+                        <span>₹12,00,001 – ₹15,00,000</span>
+                        <span class="tc-slab-rate">20%</span>
+                    </div>
+                    <div class="tc-slab {% if taxable_income > 1500000 %}active{% endif %}">
+                        <span>Above ₹15,00,000</span>
+                        <span class="tc-slab-rate">30%</span>
+                    </div>
+                    {% else %}
+                    <div class="tc-slab {% if taxable_income <= 250000 %}active{% endif %}">
+                        <span>Up to ₹2,50,000</span>
+                        <span class="tc-slab-rate nil">Nil</span>
+                    </div>
+                    <div class="tc-slab {% if taxable_income > 250000 and taxable_income <= 500000 %}active{% endif %}">
+                        <span>₹2,50,001 – ₹5,00,000</span>
+                        <span class="tc-slab-rate">5%</span>
+                    </div>
+                    <div
+                        class="tc-slab {% if taxable_income > 500000 and taxable_income <= 1000000 %}active{% endif %}">
+                        <span>₹5,00,001 – ₹10,00,000</span>
+                        <span class="tc-slab-rate">20%</span>
+                    </div>
+                    <div class="tc-slab {% if taxable_income > 1000000 %}active{% endif %}">
+                        <span>Above ₹10,00,000</span>
+                        <span class="tc-slab-rate">30%</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="tc-info-box">
+                    <strong>Surcharge</strong>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        <li>Income &gt; ₹50L → 10%</li>
+                        <li>Income &gt; ₹1Cr → 15%</li>
+                        <li>Income &gt; ₹2Cr → 25%</li>
+                        <li>Income &gt; ₹5Cr → 37%</li>
+                    </ul>
+                </div>
+
+                {% if regime == 'new' %}
+                <div class="tc-info-box">
+                    <strong>Section 87A</strong>
+                    Rebate up to ₹25,000 if taxable income ≤ ₹7,00,000. Zero tax below this threshold.
+                </div>
+                {% else %}
+                <div class="tc-info-box">
+                    <strong>Key Deductions</strong>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        <li>80C — up to ₹1,50,000</li>
+                        <li>80D — ₹25,000–₹50,000</li>
+                        <li>Sec 24 — HLI ₹2,00,000</li>
+                        <li>80CCD(1B) — NPS ₹50,000</li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Comparison -->
+    <div class="tc-compare">
+        <div class="tc-compare-header">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" color="#5a6070">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span class="tc-compare-title">Regime Comparison</span>
+        </div>
+        <div class="tc-compare-grid">
+            <div class="tc-compare-col">
+                <div class="tc-compare-col-title">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    New Regime
+                </div>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li>Lower tax slab rates</li>
+                    <li>No investment proof required</li>
+                    <li>Simpler compliance</li>
+                    <li>Higher basic exemption (₹3L)</li>
+                </ul>
+                <span class="best">Ideal if deductions &lt; ₹2.5L</span>
+            </div>
+            <div class="tc-compare-col">
+                <div class="tc-compare-col-title">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Old Regime
+                </div>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li>80C, 80D, HRA deductions</li>
+                    <li>Home loan interest benefit</li>
+                    <li>LTA &amp; other exemptions</li>
+                    <li>Higher savings potential</li>
+                </ul>
+                <span class="best">Ideal if deductions &gt; ₹2.5L</span>
             </div>
         </div>
     </div>
 
-    <!-- Tax Saving Tips -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">💡 Tax Saving Tips</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="flex items-start space-x-3">
-                <span class="text-green-500 text-xl">✓</span>
-                <p class="text-gray-600">Invest up to ₹1.5L in 80C instruments (PPF, ELSS, etc.)</p>
-            </div>
-            <div class="flex items-start space-x-3">
-                <span class="text-green-500 text-xl">✓</span>
-                <p class="text-gray-600">Buy health insurance and claim under Section 80D</p>
-            </div>
-            <div class="flex items-start space-x-3">
-                <span class="text-green-500 text-xl">✓</span>
-                <p class="text-gray-600">Claim HRA exemption if you live in rented house</p>
-            </div>
-        </div>
+    <!-- Actions -->
+    <div class="tc-actions">
+        <a href="{% url 'dashboard' %}" class="tc-btn tc-btn-secondary">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+        </a>
+        <a href="{% url 'explore_plans' %}" class="tc-btn tc-btn-primary">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Explore Tax-Saving Plans
+        </a>
     </div>
+
 </div>
 {% endblock %}
