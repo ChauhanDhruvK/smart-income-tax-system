@@ -1,10 +1,12 @@
 {% extends 'accounts/base.html' %}
+{% load humanize %}
 {% block title %}Tax Calculation{% endblock %}
 
 {% block content %}
+
 <style>
     .result-card {
-        background: var(--gradient);
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
         color: white;
         padding: 2rem;
         border-radius: 16px;
@@ -30,10 +32,11 @@
         padding: 1.5rem;
         border-radius: 12px;
         text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .detail-label {
-        color: var(--text-light);
+        color: #6b7280;
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
     }
@@ -41,7 +44,7 @@
     .detail-value {
         font-size: 1.5rem;
         font-weight: bold;
-        color: var(--primary);
+        color: #2563eb;
     }
 
     .regime-toggle {
@@ -53,18 +56,71 @@
 
     .regime-btn {
         padding: 0.75rem 2rem;
-        border: 2px solid var(--primary);
+        border: 2px solid #2563eb;
         border-radius: 8px;
         text-decoration: none;
-        color: var(--primary);
+        color: #2563eb;
         font-weight: 600;
         transition: all 0.3s;
     }
 
     .regime-btn.active {
-        background: var(--gradient);
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
         color: white;
         border-color: transparent;
+    }
+
+    .regime-btn:hover {
+        background: #2563eb;
+        color: white;
+    }
+
+    .breakdown-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .breakdown-row:last-child {
+        border-bottom: none;
+    }
+
+    .breakdown-total {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .period-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .period-card {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .period-title {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-bottom: 0.3rem;
+    }
+
+    .period-value {
+        font-size: 1.3rem;
+        font-weight: bold;
     }
 
     .action-buttons {
@@ -72,11 +128,27 @@
         gap: 1rem;
         justify-content: center;
     }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: #111827;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+    }
 </style>
 
 <div class="result-card">
     <div>Your Total Tax Liability</div>
-    <div class="result-amount">₹{{ total_tax|floatformat:2 }}</div>
+    <div class="result-amount">₹ {{ total_tax|floatformat:2|intcomma }}</div>
     <div>For Financial Year 2025-26</div>
 </div>
 
@@ -88,24 +160,74 @@
 <div class="details-grid">
     <div class="detail-item">
         <div class="detail-label">Total Income</div>
-        <div class="detail-value">₹{{ total_income|floatformat:2 }}</div>
+        <div class="detail-value">₹ {{ total_income|floatformat:2|intcomma }}</div>
     </div>
+
+    ```
     <div class="detail-item">
         <div class="detail-label">Deductions</div>
-        <div class="detail-value">₹{{ total_deductions|floatformat:2 }}</div>
+        <div class="detail-value">₹ {{ total_deductions|floatformat:2|intcomma }}</div>
     </div>
+
     <div class="detail-item">
         <div class="detail-label">Taxable Income</div>
-        <div class="detail-value">₹{{ taxable_income|floatformat:2 }}</div>
+        <div class="detail-value">₹ {{ taxable_income|floatformat:2|intcomma }}</div>
     </div>
+
     <div class="detail-item">
         <div class="detail-label">Effective Rate</div>
         <div class="detail-value">{{ effective_tax_rate|floatformat:1 }}%</div>
     </div>
+    ```
+
 </div>
 
-<div class="action-buttons">
-    <a href="{% url 'explore_plans' %}" class="btn btn-primary">Explore Savings</a>
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Dashboard</a>
+<div class="breakdown-card">
+
+    ```
+    <div class="breakdown-row">
+        <span>Income Tax (as per slabs)</span>
+        <span>₹ {{ base_tax|floatformat:2|intcomma }}</span>
+    </div>
+
+    <div class="breakdown-row">
+        <span>Health & Education Cess (4%)</span>
+        <span>₹ {{ cess|floatformat:2|intcomma }}</span>
+    </div>
+
+    <div class="breakdown-row breakdown-total">
+        <span>Total Tax Payable</span>
+        <span>₹ {{ total_tax|floatformat:2|intcomma }}</span>
+    </div>
+    ```
+
 </div>
+
+<div class="period-grid">
+
+    ```
+    <div class="period-card">
+        <div class="period-title">PER MONTH</div>
+        <div class="period-value">
+            ₹ {{ monthly|floatformat:0|intcomma }}
+        </div>
+    </div>
+
+    <div class="period-card">
+        <div class="period-title">PER DAY</div>
+        <div class="period-value">
+            ₹ {{ daily|floatformat:0|intcomma }}
+        </div>
+    </div>
+    ```
+
+</div>
+
+<br>
+
+<div class="action-buttons">
+    <a href="{% url 'explore_plans' %}" class="btn-primary">Explore Savings</a>
+    <a href="{% url 'dashboard' %}" class="btn-secondary">Dashboard</a>
+</div>
+
 {% endblock %}

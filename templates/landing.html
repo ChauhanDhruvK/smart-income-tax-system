@@ -1,223 +1,46 @@
-<!doctype html>
-<html lang="en">
+<nav class="bg-white border-b border-gray-200 fixed w-full z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Logo -->
+        <a href="/" class="text-2xl font-semibold text-blue-600 tracking-tight">
+            SmartTax
+        </a>
 
-    <title>Smart Income & Tax Planning System</title>
+        <!-- Menu -->
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-600">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+            <a href="/" class="hover:text-blue-600 transition">
+                Home
+            </a>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+            <a href="#features" class="hover:text-blue-600 transition">
+                Features
+            </a>
 
-    <style>
-        body {
-            font-family: "Poppins", sans-serif;
-        }
-    </style>
-</head>
+            <a href="#about" class="hover:text-blue-600 transition">
+                About
+            </a>
 
-<body class="bg-gray-50">
-    <!-- NAVBAR -->
-    <nav class="bg-white shadow-md fixed w-full z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">SmartTax</h1>
+            <a href="#contact" class="hover:text-blue-600 transition">
+                Contact
+            </a>
 
-            <div class="space-x-6 hidden md:flex">
-                <a href="#" class="text-gray-600 hover:text-blue-600">Home</a>
-                <a href="#" class="text-gray-600 hover:text-blue-600">Features</a>
-                <a href="#" class="text-gray-600 hover:text-blue-600">About</a>
-                <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
-
-                <a href="/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    Login
-                </a>
-            </div>
         </div>
-    </nav>
 
-    <!-- HERO SECTION -->
-    <section class="pt-32 pb-20">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
-            <div>
-                <h1 class="text-5xl font-bold text-gray-800 leading-tight">
-                    Smart Income &
-                    <span class="text-blue-600">Tax Planning</span>
-                    Made Simple
-                </h1>
+        <!-- Auth Buttons -->
+        <div class="hidden md:flex items-center space-x-4">
 
-                <p class="mt-6 text-gray-600 text-lg">
-                    Manage your income, track expenses, and calculate taxes effortlessly
-                    with our intelligent tax planning system designed for individuals
-                    and professionals.
-                </p>
-
-                <div class="mt-8 space-x-4">
-                    <a href="/register" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700">
-                        Get Started
-                    </a>
-
-                    <a href="#features"
-                        class="px-6 py-3 border border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50">
-                        Learn More
-                    </a>
-                </div>
-            </div>
-
-            <div>
-                <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f" class="rounded-2xl shadow-xl" />
-            </div>
-        </div>
-    </section>
-
-    <!-- FEATURES -->
-    <section id="features" class="bg-white py-20">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center text-gray-800">
-                Powerful Features
-            </h2>
-
-            <p class="text-center text-gray-600 mt-4">
-                Everything you need to manage and optimize your tax planning.
-            </p>
-
-            <div class="grid md:grid-cols-3 gap-10 mt-14">
-                <!-- CARD 1 -->
-
-                <div class="bg-gray-50 p-8 rounded-xl shadow hover:shadow-lg transition">
-                    <h3 class="text-xl font-semibold text-blue-600">Income Tracking</h3>
-
-                    <p class="mt-4 text-gray-600">
-                        Record and manage multiple sources of income with ease and
-                        accuracy.
-                    </p>
-                </div>
-
-                <!-- CARD 2 -->
-
-                <div class="bg-gray-50 p-8 rounded-xl shadow hover:shadow-lg transition">
-                    <h3 class="text-xl font-semibold text-blue-600">
-                        Smart Tax Calculation
-                    </h3>
-
-                    <p class="mt-4 text-gray-600">
-                        Automatically calculate tax using updated tax slabs and
-                        intelligent logic.
-                    </p>
-                </div>
-
-                <!-- CARD 3 -->
-
-                <div class="bg-gray-50 p-8 rounded-xl shadow hover:shadow-lg transition">
-                    <h3 class="text-xl font-semibold text-blue-600">
-                        Analytics Dashboard
-                    </h3>
-
-                    <p class="mt-4 text-gray-600">
-                        Visual insights and reports to understand your income and tax
-                        liabilities.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center text-gray-800">
-                How It Works
-            </h2>
-
-            <div class="grid md:grid-cols-3 gap-12 mt-16 text-center">
-                <div>
-                    <div class="text-4xl font-bold text-blue-600">1</div>
-
-                    <h3 class="text-xl font-semibold mt-4">Create Account</h3>
-
-                    <p class="text-gray-600 mt-2">
-                        Register and securely access your tax management dashboard.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="text-4xl font-bold text-blue-600">2</div>
-
-                    <h3 class="text-xl font-semibold mt-4">Add Income Details</h3>
-
-                    <p class="text-gray-600 mt-2">
-                        Enter your income sources and financial details.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="text-4xl font-bold text-blue-600">3</div>
-
-                    <h3 class="text-xl font-semibold mt-4">Get Tax Insights</h3>
-
-                    <p class="text-gray-600 mt-2">
-                        Instant tax calculation and planning suggestions.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CALL TO ACTION -->
-
-    <section class="bg-blue-600 py-16">
-        <div class="max-w-4xl mx-auto text-center text-white px-6">
-            <h2 class="text-4xl font-bold">
-                Start Managing Your Taxes Smarter Today
-            </h2>
-
-            <p class="mt-4 text-blue-100">
-                Join thousands of users simplifying their tax planning.
-            </p>
+            <a href="{% url 'login' %}"
+                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition">
+                Login
+            </a>
 
             <a href="{% url 'register' %}"
-                class="inline-block mt-8 px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl shadow hover:bg-gray-100">
-                Create Free Account
+                class="px-5 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm">
+                Get Started
             </a>
+
         </div>
-    </section>
 
-    <!-- FOOTER -->
-
-    <footer class="bg-gray-900 text-gray-400 py-10">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-10">
-            <div>
-                <h3 class="text-white text-xl font-semibold">SmartTax</h3>
-
-                <p class="mt-4">
-                    A smart system designed to simplify income management and tax
-                    planning.
-                </p>
-            </div>
-
-            <div>
-                <h3 class="text-white font-semibold">Quick Links</h3>
-
-                <ul class="mt-4 space-y-2">
-                    <li><a href="#" class="hover:text-white">Home</a></li>
-                    <li><a href="#" class="hover:text-white">Features</a></li>
-                    <li><a href="#" class="hover:text-white">Contact</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h3 class="text-white font-semibold">Contact</h3>
-
-                <p class="mt-4">Email: support@smarttax.com</p>
-
-                <p class="mt-2">© 2026 Smart Income & Tax Planning System</p>
-            </div>
-        </div>
-    </footer>
-</body>
-
-</html>
+    </div>
+</nav>
