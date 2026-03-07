@@ -695,7 +695,7 @@
                     {% endif %}
                     <div class="tc-row">
                         <span class="tc-row-label">Less: Standard Deduction</span>
-                        <span class="tc-row-val deduct">− ₹ 50,000</span>
+                        <span class="tc-row-val deduct">− ₹ 0</span>
                     </div>
                     <div class="tc-row sum">
                         <span class="tc-row-label">Net Taxable Income</span>
@@ -745,13 +745,13 @@
                     <div class="tc-monthly">
                         <div>
                             <div class="tc-m-label">Per Month</div>
-                            <div class="tc-m-val">₹ {% widthratio total_tax 12 1 as monthly %}{{
-                                monthly|floatformat:0|intcomma }}</div>
+                            <div class="tc-m-val">₹ {% widthratio total_tax 12 1 as monthly %}
+                                {{ monthly|floatformat:0|intcomma }}</div>
                         </div>
                         <div>
                             <div class="tc-m-label">Per Day</div>
-                            <div class="tc-m-val">₹ {% widthratio total_tax 365 1 as daily %}{{
-                                daily|floatformat:0|intcomma }}</div>
+                            <div class="tc-m-val">₹ {% widthratio total_tax 365 1 as daily %}
+                                {{ daily|floatformat:0|intcomma }}</div>
                         </div>
                     </div>
                 </div>

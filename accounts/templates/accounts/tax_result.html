@@ -163,7 +163,6 @@
         <div class="detail-value">₹ {{ total_income|floatformat:2|intcomma }}</div>
     </div>
 
-    ```
     <div class="detail-item">
         <div class="detail-label">Deductions</div>
         <div class="detail-value">₹ {{ total_deductions|floatformat:2|intcomma }}</div>
@@ -178,13 +177,11 @@
         <div class="detail-label">Effective Rate</div>
         <div class="detail-value">{{ effective_tax_rate|floatformat:1 }}%</div>
     </div>
-    ```
 
 </div>
 
 <div class="breakdown-card">
 
-    ```
     <div class="breakdown-row">
         <span>Income Tax (as per slabs)</span>
         <span>₹ {{ base_tax|floatformat:2|intcomma }}</span>
@@ -199,13 +196,11 @@
         <span>Total Tax Payable</span>
         <span>₹ {{ total_tax|floatformat:2|intcomma }}</span>
     </div>
-    ```
 
 </div>
 
 <div class="period-grid">
 
-    ```
     <div class="period-card">
         <div class="period-title">PER MONTH</div>
         <div class="period-value">
@@ -219,7 +214,6 @@
             ₹ {{ daily|floatformat:0|intcomma }}
         </div>
     </div>
-    ```
 
 </div>
 

@@ -11,6 +11,9 @@ from .models import Income, Deduction, TaxRecord
 # ----------------------------
 # User Registration
 # ----------------------------
+# ----------------------------
+# User Registration (Auto-login after registration)
+# ----------------------------
 def register_view(request):
 
     if request.method == "POST":
@@ -28,17 +31,22 @@ def register_view(request):
             messages.error(request, "Username already exists.")
             return redirect("register")
 
-        User.objects.create_user(
+        # Create the user
+        user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
 
-        messages.success(request, "Account created successfully.")
-        return redirect("login")
+        # Automatically log in the user
+        login(request, user)
+        
+        messages.success(request, f"Welcome {username}! Your account has been created successfully.")
+        
+        # Redirect directly to dashboard
+        return redirect("dashboard")
 
     return render(request, "accounts/register.html")
-
 
 # ----------------------------
 # User Login
@@ -189,6 +197,7 @@ def calculate_tax_view(request):
         taxable_income = Decimal("0.00")
 
     tax = Decimal("0.00")
+    surcharge = Decimal("0.00")  # Initialize surcharge
 
     # New Regime Slabs
     if regime == "new":
@@ -216,8 +225,17 @@ def calculate_tax_view(request):
                     (taxable_income - 1500000) * Decimal("0.30")
                 )
 
+        # Calculate surcharge for new regime
+        if taxable_income > 5000000:
+            surcharge = tax * Decimal("0.25")  # 25% for >5Cr
+        elif taxable_income > 2000000:
+            surcharge = tax * Decimal("0.15")  # 15% for >2Cr
+        elif taxable_income > 1000000:
+            surcharge = tax * Decimal("0.10")  # 10% for >1Cr
+
         if taxable_income <= 700000:
             tax = Decimal("0.00")
+            surcharge = Decimal("0.00")
 
     # Old Regime Slabs
     else:
@@ -237,11 +255,24 @@ def calculate_tax_view(request):
                     (taxable_income - 1000000) * Decimal("0.30")
                 )
 
+        # Calculate surcharge for old regime
+        if taxable_income > 5000000:
+            surcharge = tax * Decimal("0.37")  # 37% for >5Cr
+        elif taxable_income > 2000000:
+            surcharge = tax * Decimal("0.25")  # 25% for >2Cr
+        elif taxable_income > 1000000:
+            surcharge = tax * Decimal("0.15")  # 15% for >1Cr
+        elif taxable_income > 500000:
+            surcharge = tax * Decimal("0.10")  # 10% for >50L
+
         if taxable_income <= 500000:
             tax = Decimal("0.00")
+            surcharge = Decimal("0.00")
 
-    cess = tax * Decimal("0.04")
-    total_tax = tax + cess
+    # Apply surcharge to tax
+    tax_with_surcharge = tax + surcharge
+    cess = tax_with_surcharge * Decimal("0.04")
+    total_tax = tax_with_surcharge + cess
 
     monthly = total_tax / Decimal("12")
     daily = total_tax / Decimal("365")
@@ -261,7 +292,8 @@ def calculate_tax_view(request):
         "total_income": total_income,
         "total_deductions": total_deductions,
         "taxable_income": taxable_income,
-        "base_tax": tax,
+        "tax": tax,  # Changed from base_tax to tax
+        "surcharge": surcharge,  # Added surcharge
         "cess": cess,
         "total_tax": total_tax,
         "monthly": monthly,
@@ -271,7 +303,6 @@ def calculate_tax_view(request):
     }
 
     return render(request, "accounts/calculate_tax.html", context)
-
 
 # ----------------------------
 # Explore Investment Plans
