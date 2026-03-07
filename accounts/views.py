@@ -316,7 +316,7 @@ def explore_plans(request):
 # Plan Detail Page
 # ----------------------------
 @login_required
-def plan_detail(request, slug):
+def plan_detail(request, plan_type):
 
     plans = {
         "elss": {"name": "ELSS Mutual Funds", "return": "14%", "desc": "Tax saving under section 80C"},
@@ -328,7 +328,8 @@ def plan_detail(request, slug):
     }
 
     context = {
-        "plan": plans.get(slug)
+        "plan": plans.get(plan_type),
+        "plan_slug": plan_type
     }
 
     return render(request, "accounts/plan_detail.html", context)
